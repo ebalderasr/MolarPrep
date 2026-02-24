@@ -111,25 +111,6 @@ MolarPrep includes a simple validation layer to reduce bad inputs:
 
 This is intentionally simple and explicit so users can catch mistakes quickly.
 
----
-
-## Quick usage guide
-
-### A. Solid reagent workflow
-1. Enter **Molecular Weight (g/mol)**
-2. Enter **Target Molarity** + choose unit (M, mM, µM, nM)
-3. Enter **Final Volume** + choose unit (L or mL)
-4. Click **Calculate Mass**
-5. Weigh the reported mass
-
-### B. Liquid reagent workflow
-1. Enter **Density (g/mL)**
-2. Enter **Purity (%)**
-3. Enter **Molecular Weight (g/mol)**
-4. Enter **Target Molarity (M)**
-5. Enter **Target Volume (mL)**
-6. Click **Calculate Stock**
-7. Pipette the reported stock volume and complete to final volume
 
 ---
 
