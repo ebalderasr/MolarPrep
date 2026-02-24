@@ -1,7 +1,6 @@
-# 🧪 MolarPrep
+# 🧪 MolarPrep | Host Cell Lab Suite
+**Fast, reliable molarity and stock-solution calculations for laboratory workflows.**  
 
-> **Fast, reliable molarity and stock-solution calculations for laboratory workflows.**  
-> Part of **Host Cell**, a growing suite of bioprocess tools.
 
 <p align="center">
   <img src="icon-512.png" width="180" alt="MolarPrep Logo">
