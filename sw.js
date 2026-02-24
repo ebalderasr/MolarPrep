@@ -1,4 +1,5 @@
-const CACHE_NAME = 'molarprep-v1';
+/* sw.js */
+const CACHE_NAME = 'molarprep-v2'; // Cambiado de v1 a v2
 const ASSETS = [
   './',
   './index.html',
