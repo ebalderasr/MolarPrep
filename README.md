@@ -1,7 +1,6 @@
-# 🧪 MolarPrep
+# 🧪 MolarPrep | Host Cell Lab Suite
+**Fast, reliable molarity and stock-solution calculations for laboratory workflows.**  
 
-> **Fast, reliable molarity and stock-solution calculations for laboratory workflows.**  
-> Part of **Host Cell**, a growing suite of bioprocess tools.
 
 <p align="center">
   <img src="icon-512.png" width="180" alt="MolarPrep Logo">
@@ -36,23 +35,6 @@ The app is designed to reduce common errors such as:
 - stock concentration estimation from reagent density + purity
 
 ---
-
-## Part of the Host Cell Suite
-
-**MolarPrep** is part of **Host Cell**, a suite of practical tools for bioprocessing and lab workflows.
-
-### Host Cell vision
-A modular toolbox for:
-- solution preparation
-- bioprocess calculations
-- experimental planning
-- data organization
-- fast operational decisions in the lab
-
-This project focuses on **clarity, speed, and reproducibility**, with a minimal interface that works well on desktop and mobile.
-
----
-
 ## How it works
 
 MolarPrep currently includes **two calculation modules**.
@@ -128,48 +110,6 @@ MolarPrep includes a simple validation layer to reduce bad inputs:
 
 This is intentionally simple and explicit so users can catch mistakes quickly.
 
----
-
-## Quick usage guide
-
-### A. Solid reagent workflow
-1. Enter **Molecular Weight (g/mol)**
-2. Enter **Target Molarity** + choose unit (M, mM, µM, nM)
-3. Enter **Final Volume** + choose unit (L or mL)
-4. Click **Calculate Mass**
-5. Weigh the reported mass
-
-### B. Liquid reagent workflow
-1. Enter **Density (g/mL)**
-2. Enter **Purity (%)**
-3. Enter **Molecular Weight (g/mol)**
-4. Enter **Target Molarity (M)**
-5. Enter **Target Volume (mL)**
-6. Click **Calculate Stock**
-7. Pipette the reported stock volume and complete to final volume
-
----
-
-## Why this tool exists
-
-In real lab workflows, calculation mistakes often come from:
-- fatigue
-- context switching
-- repeated manual conversions
-- rushed preparation before experiments
-
-MolarPrep aims to be a small but dependable utility for these everyday tasks.
-
----
-
-## Features
-
-- ✅ **Two core modules**: solids and liquid stocks
-- ✅ **Unit-aware inputs** (M, mM, µM, nM; L, mL)
-- ✅ **Smart metric output formatting**
-- ✅ **Offline-ready PWA** (after first load)
-- ✅ **Mobile-friendly interface**
-- ✅ **Simple, transparent formulas**
 
 ---
 
@@ -196,3 +136,8 @@ Once installed, it can work offline after the necessary files are cached.
 Biotechnology Engineer | PhD Student in Biochemistry
 *Instituto de Biotecnología (IBt) - UNAM.*
 
+---
+
+## Part of the Host Cell Suite
+
+**MolarPrep** is part of **Host Cell**, a suite of practical tools for bioprocessing and lab workflows.
