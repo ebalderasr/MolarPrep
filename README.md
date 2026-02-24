@@ -133,29 +133,6 @@ This is intentionally simple and explicit so users can catch mistakes quickly.
 
 ---
 
-## Why this tool exists
-
-In real lab workflows, calculation mistakes often come from:
-- fatigue
-- context switching
-- repeated manual conversions
-- rushed preparation before experiments
-
-MolarPrep aims to be a small but dependable utility for these everyday tasks.
-
----
-
-## Features
-
-- ✅ **Two core modules**: solids and liquid stocks
-- ✅ **Unit-aware inputs** (M, mM, µM, nM; L, mL)
-- ✅ **Smart metric output formatting**
-- ✅ **Offline-ready PWA** (after first load)
-- ✅ **Mobile-friendly interface**
-- ✅ **Simple, transparent formulas**
-
----
-
 ## Installation / PWA (optional)
 
 MolarPrep can be installed as a Progressive Web App (PWA) on supported browsers.
