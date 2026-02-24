@@ -36,23 +36,6 @@ The app is designed to reduce common errors such as:
 - stock concentration estimation from reagent density + purity
 
 ---
-
-## Part of the Host Cell Suite
-
-**MolarPrep** is part of **Host Cell**, a suite of practical tools for bioprocessing and lab workflows.
-
-### Host Cell vision
-A modular toolbox for:
-- solution preparation
-- bioprocess calculations
-- experimental planning
-- data organization
-- fast operational decisions in the lab
-
-This project focuses on **clarity, speed, and reproducibility**, with a minimal interface that works well on desktop and mobile.
-
----
-
 ## How it works
 
 MolarPrep currently includes **two calculation modules**.
@@ -196,3 +179,8 @@ Once installed, it can work offline after the necessary files are cached.
 Biotechnology Engineer | PhD Student in Biochemistry
 *Instituto de Biotecnología (IBt) - UNAM.*
 
+---
+
+## Part of the Host Cell Suite
+
+**MolarPrep** is part of **Host Cell**, a suite of practical tools for bioprocessing and lab workflows.
