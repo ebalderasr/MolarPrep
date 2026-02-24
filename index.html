@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>MolarPrep | Host Cell</title>
+    
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="MolarPrep">
+    <link rel="apple-touch-icon" href="icon-192.jpg">
+    <link rel="manifest" href="manifest.json">
+
+    <style>
+        /* --- VARIABLES DE DISEÑO (Brutalismo Host Cell) --- */
+        :root {
+            --bg-main: #0a0a0a;
+            --bg-card: #171717;
+            --bg-input: #262626;
+            --accent: #00e5ff; /* Cian Eléctrico */
+            --accent-glow: rgba(0, 229, 255, 0.2);
+            --text-pri: #f5f5f5;
+            --text-sec: #a3a3a3;
+            --border-color: #333333;
+            --danger: #ef5350;
+        }
+
+        body {
+            font-family: 'Courier New', Courier, monospace;
+            background-color: var(--bg-main);
+            color: var(--text-pri);
+            margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
+            line-height: 1.4;
+        }
+
+        .u { font-family: Arial, sans-serif; text-transform: none !important; }
+
+        /* --- ENCABEZADO --- */
+        .header-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            max-width: 1000px;
+            margin: 0 auto 25px auto;
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 15px;
+        }
+
+        .header-title { color: var(--accent); text-transform: uppercase; font-size: 1.8rem; margin: 0; }
+        .header-subtitle { font-size: 0.8rem; color: var(--text-sec); margin-top: 5px; }
+
+        .controls { display: flex; flex-direction: column; gap: 10px; align-items: flex-end; }
+        .lang-switch { font-weight: bold; color: var(--text-sec); cursor: pointer; }
+        .lang-switch span.active { color: var(--accent); }
+
+        .btn-clear {
+            background: transparent; color: var(--text-sec); border: 1px solid var(--text-sec);
+            padding: 6px 12px; font-size: 0.8rem; cursor: pointer; text-transform: uppercase; font-family: inherit;
+        }
+        .btn-clear:hover { background: var(--danger); color: white; border-color: var(--danger); }
+
+        .btn-docs {
+            background: var(--bg-input); color: var(--accent); border: 1px solid var(--accent);
+            padding: 8px 14px; font-size: 0.85rem; text-decoration: none; text-transform: uppercase; font-weight: bold; display: inline-block;
+        }
+        .btn-docs:hover { background: var(--accent); color: #000; }
+
+        /* Botón de instalación con pulso cian */
+        #install-btn {
+            border-color: var(--accent); color: var(--accent);
+            animation: pulse-cyan 2s infinite;
+        }
+
+        @keyframes pulse-cyan {
+            0% { box-shadow: 0 0 0 0 rgba(0, 229, 255, 0.4); }
+            70% { box-shadow: 0 0 0 8px rgba(0, 229, 255, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(0, 229, 255, 0); }
+        }
+
+        /* --- GRID Y TARJETAS --- */
+        .app-grid { display: grid; grid-template-columns: 1fr; gap: 25px; max-width: 1000px; margin: 0 auto; }
+        @media (min-width: 768px) { .app-grid { grid-template-columns: 1fr 1fr; } }
+
+        .card { background: var(--bg-card); padding: 25px; border: 1px solid var(--border-color); display: flex; flex-direction: column; transition: border 0.3s ease; }
+        .card-title { margin-top: 0; margin-bottom: 20px; font-size: 1.1rem; text-transform: uppercase; }
+
+        .input-group { margin-bottom: 18px; }
+        label { display: block; font-size: 0.8rem; color: var(--text-sec); text-transform: uppercase; margin-bottom: 6px; font-weight: bold; }
+        
+        .row-group { display: flex; gap: 10px; }
+        input, select {
+            width: 100%; padding: 12px; background: var(--bg-input);
+            border: 1px solid var(--border-color); color: var(--text-pri);
+            font-family: inherit; font-size: 1.1rem; box-sizing: border-box;
+        }
+        input:focus { border-color: var(--accent); outline: none; }
+
+        .btn-action {
+            width: 100%; padding: 15px; background: var(--bg-input); color: var(--accent); border: 1px solid var(--accent);
+            font-weight: bold; text-transform: uppercase; cursor: pointer; margin-top: auto;
+        }
+        .btn-action:hover { background: var(--accent); color: #000; }
+
+        /* --- RESULTADOS --- */
+        .results-box { margin-top: 20px; padding: 15px; border: 1px dashed var(--accent); background: var(--accent-glow); text-align: center; }
+        .res-label { font-size: 0.8rem; color: var(--text-sec); text-transform: uppercase; margin-bottom: 5px; }
+        .res-val { font-size: 1.8rem; font-weight: bold; color: var(--accent); }
+
+        .footer-info { max-width: 1000px; margin: 40px auto; padding-top: 20px; border-top: 1px solid var(--border-color); }
+        .author-box { border-left: 3px solid var(--accent); padding-left: 15px; color: var(--text-sec); font-size: 0.8rem; }
+    </style>
+</head>
+<body>
+
+    <div class="header-container">
+        <div>
+            <h1 class="header-title">MolarPrep</h1>
+            <div class="header-subtitle">HOST CELL LAB TOOLS</div>
+        </div>
+        <div class="controls">
+            <div class="lang-switch">
+                <span id="lang-es" class="active" onclick="setLanguage('es')">ES</span> | 
+                <span id="lang-en" onclick="setLanguage('en')">EN</span>
+            </div>
+            <a href="https://github.com/ebalderasr/MolarPrep" target="_blank" class="btn-docs" data-i18n="btnDocs">[ Documentación ]</a>
+            <button class="btn-clear" onclick="limpiarDatos()" data-i18n="btnClear">[ Limpiar ]</button>
+            <button id="install-btn" class="btn-clear" style="display:none;" data-i18n="btnInstall">[ Instalar ]</button>
+        </div>
+    </div>
+
+    <div class="app-grid">
+        <div class="card" id="card-solids">
+            <h2 class="card-title" data-i18n="card1Title">01. Sólidos</h2>
+            <div class="input-group">
+                <label data-i18n="lblMW">Peso Molecular</label>
+                <input type="number" id="s_mw" placeholder="g/mol" min="0.0001" step="any">
+            </div>
+            <div class="input-group">
+                <label data-i18n="lblMolarity">Molaridad Meta</label>
+                <div class="row-group">
+                    <input type="number" id="s_m" placeholder="0.0" min="0.0001" step="any">
+                    <select id="s_m_u" style="flex: 0.6;">
+                        <option value="1">M</option><option value="0.001">mM</option>
+                        <option value="0.000001">μM</option><option value="0.000000001">nM</option>
+                    </select>
+                </div>
+            </div>
+            <div class="input-group">
+                <label data-i18n="lblVol">Volumen Final</label>
+                <div class="row-group">
+                    <input type="number" id="s_v" placeholder="0.0" min="0.0001" step="any">
+                    <select id="s_v_u" style="flex: 0.6;">
+                        <option value="1">L</option><option value="0.001">mL</option>
+                    </select>
+                </div>
+            </div>
+            <button class="btn-action" onclick="calcSolids()" data-i18n="btnCalc">Calcular Masa</button>
+            <div class="results-box">
+                <div class="res-label" data-i18n="resMass">Masa Requerida</div>
+                <div class="res-val" id="out_mass">---</div>
+            </div>
+        </div>
+
+        <div class="card" id="card-liquids">
+            <h2 class="card-title" data-i18n="card2Title">02. Líquidos</h2>
+            <div class="input-group">
+                <label data-i18n="lblStock">Stock (ρ y %)</label>
+                <div class="row-group">
+                    <input type="number" id="l_rho" placeholder="g/mL" min="0.0001">
+                    <input type="number" id="l_p" placeholder="%" min="0.0001" max="100">
+                </div>
+            </div>
+            <div class="input-group">
+                <label data-i18n="lblMW">Peso Molecular</label>
+                <input type="number" id="l_mw" placeholder="g/mol" min="0.0001">
+            </div>
+            <div class="row-group">
+                <div class="input-group">
+                    <label data-i18n="lblTargetM">M Meta (M)</label>
+                    <input type="number" id="l_m2" placeholder="0.0" min="0.0001">
+                </div>
+                <div class="input-group">
+                    <label data-i18n="lblTargetV">V Meta (mL)</label>
+                    <input type="number" id="l_v2" placeholder="0.0" min="0.0001">
+                </div>
+            </div>
+            <button class="btn-action" onclick="calcLiquids()" data-i18n="btnCalc">Calcular Stock</button>
+            <div class="results-box">
+                <div class="res-label" data-i18n="resVol">Volumen de Stock</div>
+                <div class="res-val" id="out_vol">---</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer-info">
+        <div class="author-box">
+            <strong data-i18n="lblAuthor">Autor: Emiliano Balderas</strong><br>
+            <span data-i18n="authorBio">Ingeniero en Biotecnología | Estudiante de Doctorado en Bioquímica, IBt-UNAM</span>
+        </div>
+    </div>
+
+    <script>
+        const i18n = {
+            es: {
+                btnDocs: "[ Documentación ]", btnClear: "[ Limpiar ]", btnInstall: "[ Instalar ]",
+                card1Title: "01. Reactivos Sólidos", card2Title: "02. Reactivos Líquidos",
+                lblMW: "Peso Molecular", lblMolarity: "Molaridad Meta", lblVol: "Volumen Final",
+                lblStock: "Densidad (ρ) y % Pureza", lblTargetM: "M Meta (M)", lblTargetV: "V Meta (mL)",
+                btnCalc: "Calcular", resMass: "Masa Requerida", resVol: "Volumen de Stock",
+                lblAuthor: "Autor: Emiliano Balderas", authorBio: "Ingeniero en Biotecnología | Estudiante de Doctorado en Bioquímica, IBt-UNAM"
+            },
+            en: {
+                btnDocs: "[ Documentation ]", btnClear: "[ Clear ]", btnInstall: "[ Install ]",
+                card1Title: "01. Solid Reagents", card2Title: "02. Liquid Reagents",
+                lblMW: "Molecular Weight", lblMolarity: "Target Molarity", lblVol: "Final Volume",
+                lblStock: "Density (ρ) and % Purity", lblTargetM: "Target M (M)", lblTargetV: "Target V (mL)",
+                btnCalc: "Calculate", resMass: "Required Mass", resVol: "Stock Volume",
+                lblAuthor: "Author: Emiliano Balderas", authorBio: "Biotechnology Engineer | PhD Student in Biochemistry, IBt-UNAM"
+            }
+        };
+
+        let currentLang = 'es';
+        function setLanguage(lang) {
+            currentLang = lang;
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const key = el.getAttribute('data-i18n');
+                if(i18n[lang][key]) el.innerHTML = i18n[lang][key];
+            });
+            document.getElementById('lang-es').className = lang === 'es' ? 'active' : '';
+            document.getElementById('lang-en').className = lang === 'en' ? 'active' : '';
+        }
+
+        function smartRound(val, unit) {
+            if (val <= 0 || isNaN(val)) return "ERR";
+            if (val >= 1) return val.toFixed(3) + ` <span class="u">${unit}</span>`;
+            if (val >= 0.001) return (val * 1000).toFixed(2) + ` <span class="u">m${unit}</span>`;
+            return (val * 1000000).toFixed(2) + ` <span class="u">μ${unit}</span>`;
+        }
+
+        function validate(values, cardId) {
+            const isValid = values.every(v => v > 0 && !isNaN(v));
+            const card = document.getElementById(cardId);
+            card.style.borderColor = isValid ? "var(--border-color)" : "var(--danger)";
+            return isValid;
+        }
+
+        function calcSolids() {
+            const mw = parseFloat(document.getElementById('s_mw').value);
+            const m = parseFloat(document.getElementById('s_m').value) * parseFloat(document.getElementById('s_m_u').value);
+            const v = parseFloat(document.getElementById('s_v').value) * parseFloat(document.getElementById('s_v_u').value);
+            
+            if (!validate([mw, m, v], 'card-solids')) { document.getElementById('out_mass').innerText = "ERR"; return; }
+            document.getElementById('out_mass').innerHTML = smartRound(m * v * mw, 'g');
+        }
+
+        function calcLiquids() {
+            const rho = parseFloat(document.getElementById('l_rho').value);
+            const p = parseFloat(document.getElementById('l_p').value) / 100;
+            const mw = parseFloat(document.getElementById('l_mw').value);
+            const m2 = parseFloat(document.getElementById('l_m2').value);
+            const v2 = parseFloat(document.getElementById('l_v2').value); // mL
+
+            if (!validate([rho, p, mw, m2, v2], 'card-liquids')) { document.getElementById('out_vol').innerText = "ERR"; return; }
+            const m1 = (p * rho * 1000) / mw;
+            document.getElementById('out_vol').innerHTML = smartRound((m2 * (v2/1000)) / m1, 'L');
+        }
+
+        function limpiarDatos() { location.reload(); }
+
+        // PWA INSTALL LOGIC
+        let deferredPrompt;
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault(); deferredPrompt = e;
+            document.getElementById('install-btn').style.display = 'block';
+        });
+        document.getElementById('install-btn').addEventListener('click', async () => {
+            if (deferredPrompt) { deferredPrompt.prompt(); deferredPrompt = null; }
+        });
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => { navigator.serviceWorker.register('./sw.js'); });
+        }
+        setLanguage('es');
+    </script>
+</body>
+</html>
