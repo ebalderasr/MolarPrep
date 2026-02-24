@@ -63,9 +63,9 @@ Use this when you have a dry reagent and want to prepare a solution with a targe
 
 **Formula used:**
 
-\[
+$$
 m(g) = M\left(\frac{mol}{L}\right) \times V(L) \times MW\left(\frac{g}{mol}\right)
-\]
+$$
 
 Where:
 - **m** = required mass in grams
@@ -91,9 +91,9 @@ Use this when your reagent is a liquid stock (for example acids/solvents/reagent
 
 #### Step A: Estimate stock molarity from density and purity
 
-\[
+$$
 M_1 = \frac{P \times \rho \times 1000}{MW}
-\]
+$$
 
 Where:
 - **P** = purity fraction (e.g., 98% → 0.98)
@@ -102,13 +102,13 @@ Where:
 
 #### Step B: Use dilution equation
 
-\[
+$$
 V_1 = \frac{M_1? no}
-\]
+$$
 
-\[
+$$
 V_1 = \frac{M_2 \times V_2}{M_1}
-\]
+$$
 
 Where:
 - **M₁** = stock molarity
@@ -192,16 +192,11 @@ MolarPrep can be installed as a Progressive Web App (PWA) on supported browsers.
 
 Once installed, it can work offline after the necessary files are cached.
 
+
 ---
 
-## Project structure (current)
+## 👨‍🔬 Author
+**Emiliano Balderas**
+Biotechnology Engineer | PhD Student in Biochemistry
+*Instituto de Biotecnología (IBt) - UNAM.*
 
-```text
-MolarPrep/
-├── index.html        # Main app UI + logic
-├── manifest.json     # PWA metadata
-├── sw.js             # Service worker (offline cache)
-├── icon-192.png      # App icon
-├── icon-512.png      # App icon (high-res)
-├── og-image.png      # Social preview image
-└── README.md
