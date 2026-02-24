@@ -103,10 +103,6 @@ Where:
 #### Step B: Use dilution equation
 
 $$
-V_1 = \frac{M_1? no}
-$$
-
-$$
 V_1 = \frac{M_2 \times V_2}{M_1}
 $$
 
