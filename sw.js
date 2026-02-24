@@ -1,5 +1,5 @@
 /* sw.js */
-const CACHE_NAME = 'molarprep-v5';
+const CACHE_NAME = 'molarprep-v6';
 const ASSETS = [
   './',
   './index.html',
