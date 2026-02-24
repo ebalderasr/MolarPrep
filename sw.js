@@ -1,11 +1,13 @@
 /* sw.js */
-const CACHE_NAME = 'molarprep-v4'; // Cambiado de v1 a v2
+const CACHE_NAME = 'molarprep-v5';
 const ASSETS = [
   './',
   './index.html',
   './manifest.json',
   './icon-192.png',
-  './icon-512.png'
+  './icon-512.png',
+  './icon-maskable-192.png',
+  './icon-maskable-512.png'
 ];
 
 self.addEventListener('install', (e) => {
