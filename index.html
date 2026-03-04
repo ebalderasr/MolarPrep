@@ -2,901 +2,1232 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <meta
-    name="viewport"
-    content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
-  />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>MolarPrep | Host Cell</title>
 
-  <!-- PWA / Mobile -->
-  <meta name="theme-color" content="#050607" />
+  <!-- PWA / mobile -->
+  <meta name="theme-color" content="#f2f2f7" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="apple-mobile-web-app-title" content="MolarPrep" />
 
-  <!-- Icons -->
+  <link rel="manifest" href="./manifest.json" />
   <link rel="icon" type="image/png" href="./icon-192.png" />
   <link rel="apple-touch-icon" href="./icon-192.png" />
-  <link rel="manifest" href="./manifest.json" />
 
   <!-- Social preview -->
   <meta property="og:title" content="MolarPrep | Host Cell" />
-  <meta property="og:description" content="Tool for molarity and stock solution calculations." />
+  <meta property="og:description" content="Fast, reliable molarity and stock-solution calculations." />
   <meta property="og:image" content="./og-image.png" />
 
   <style>
-    /* =========================
-       DESIGN TOKENS (MolarPrep)
-       ========================= */
-    :root {
-      --bg-main: #050607;
-      --bg-card: #111417;
-      --bg-input: #1b2126;
-      --bg-soft: #0b0f12;
+    /* ==========================================
+      MolarPrep | iOS-like UI refresh (HostCell suite)
+      - PulseGrowth-like layout: sticky header, tiles, panels
+      - Results as iOS table + Details & assumptions
+      - Fundamentals moved to Info sheet
+      - PWA friendly (install button, SW)
+    ========================================== */
 
-      --accent: #66efff;
-      --accent-strong: #00e5ff;
-      --accent-glow: rgba(0, 229, 255, 0.18);
+    :root{
+      --tint:#00e5ff; /* MolarPrep cyan */
+      --tint-weak: rgba(0, 229, 255, 0.16);
 
-      --text-pri: #eefbff;
-      --text-sec: #9bb1b8;
-      --text-dim: #6f838a;
+      --bg:#f2f2f7;
+      --bg-elev:#ffffff;
+      --bg-field: rgba(120,120,128,0.12);
 
-      --border-color: #24313a;
-      --border-soft: rgba(102, 239, 255, 0.08);
+      --label:#1c1c1e;
+      --secondary:#6e6e73;
+      --tertiary:#8e8e93;
 
-      --danger: #ef5350;
-      --danger-glow: rgba(239, 83, 80, 0.16);
+      --separator: rgba(60,60,67,0.29);
+      --nav-bg: rgba(242,242,247,0.82);
+      --stroke-1: rgba(60,60,67,0.29);
+      --stroke-2: rgba(60,60,67,0.20);
+      --stroke-3: rgba(60,60,67,0.14);
 
-      --radius: 12px;
-      --radius-sm: 8px;
-      --shadow-soft: 0 8px 24px rgba(0, 0, 0, 0.25);
-      --maxw: 1100px;
+      --btn-bg: rgba(255,255,255,0.78);
+      --btn-bg-ghost-hover: rgba(120,120,128,0.12);
+
+      --danger:#ff3b30;
+      --danger-bg: rgba(255,59,48,0.12);
+
+      --shadow: 0 8px 24px rgba(0,0,0,0.10);
+
+      --radius: 16px;
+      --radius-sm: 12px;
+      --maxw: 900px;
+
+      --safe-top: env(safe-area-inset-top, 0px);
+      --safe-bot: env(safe-area-inset-bottom, 0px);
     }
 
-    /* =========================
-       BASE
-       ========================= */
-    * {
-      box-sizing: border-box;
-    }
+    @media (prefers-color-scheme: dark){
+      :root{
+        --bg:#000000;
+        --bg-elev:#1c1c1e;
+        --bg-field: rgba(120,120,128,0.24);
 
-    html, body {
-      margin: 0;
-      padding: 0;
-      min-height: 100%;
-    }
+        --label:#ffffff;
+        --secondary:#a1a1a6;
+        --tertiary:#8e8e93;
 
-    body {
-      font-family: "Courier New", Courier, monospace;
-      color: var(--text-pri);
-      background:
-        radial-gradient(circle at 10% 10%, rgba(0, 229, 255, 0.05), transparent 40%),
-        radial-gradient(circle at 90% 20%, rgba(102, 239, 255, 0.04), transparent 35%),
-        linear-gradient(180deg, #050607 0%, #07090b 100%);
-      line-height: 1.4;
-      padding: 20px;
-    }
+        --separator: rgba(84,84,88,0.65);
+        --nav-bg: rgba(0,0,0,0.78);
+        --stroke-1: rgba(84,84,88,0.65);
+        --stroke-2: rgba(84,84,88,0.48);
+        --stroke-3: rgba(84,84,88,0.34);
 
-    .u {
-      font-family: Arial, sans-serif;
-      text-transform: none !important;
-    }
+        --btn-bg: rgba(28,28,30,0.72);
+        --btn-bg-ghost-hover: rgba(120,120,128,0.24);
 
-    .container {
-      max-width: var(--maxw);
-      margin: 0 auto;
-    }
+        --danger-bg: rgba(255,59,48,0.18);
+        --shadow: 0 10px 30px rgba(0,0,0,0.40);
 
-    /* =========================
-       HEADER
-       ========================= */
-    .header-container {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      gap: 16px;
-      margin: 0 auto 18px auto;
-      padding-bottom: 14px;
-      border-bottom: 2px solid var(--border-color);
-    }
-
-    .brand {
-      display: flex;
-      align-items: center;
-      gap: 14px;
-      min-width: 0;
-    }
-
-    .brand-logo {
-      width: 56px;
-      height: 56px;
-      object-fit: contain;
-      border-radius: 10px;
-      border: 1px solid rgba(102, 239, 255, 0.18);
-      box-shadow: 0 0 18px rgba(0, 229, 255, 0.22);
-      background: rgba(255, 255, 255, 0.01);
-      flex-shrink: 0;
-    }
-
-    .header-title {
-      margin: 0;
-      color: var(--accent);
-      text-transform: uppercase;
-      font-size: 1.85rem;
-      letter-spacing: 0.03em;
-      text-shadow: 0 0 10px rgba(0, 229, 255, 0.08);
-    }
-
-    .header-subtitle {
-      margin-top: 4px;
-      color: var(--text-sec);
-      font-size: 0.8rem;
-      letter-spacing: 0.09em;
-      text-transform: uppercase;
-    }
-
-    .controls {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-      align-items: flex-end;
-      flex-shrink: 0;
-    }
-
-    .lang-switch {
-      font-weight: bold;
-      color: var(--text-sec);
-      user-select: none;
-    }
-
-    .lang-switch button {
-      background: transparent;
-      border: 0;
-      color: inherit;
-      font: inherit;
-      cursor: pointer;
-      padding: 0;
-      text-transform: uppercase;
-    }
-
-    .lang-switch button.active {
-      color: var(--accent);
-      text-shadow: 0 0 8px rgba(0, 229, 255, 0.28);
-    }
-
-    .btn-clear,
-    .btn-docs,
-    .btn-action {
-      font-family: inherit;
-      text-transform: uppercase;
-      cursor: pointer;
-      border-radius: var(--radius-sm);
-      transition: 0.2s ease;
-    }
-
-    .btn-clear {
-      background: transparent;
-      color: var(--text-sec);
-      border: 1px solid var(--text-sec);
-      padding: 7px 12px;
-      font-size: 0.8rem;
-    }
-
-    .btn-clear:hover {
-      background: var(--danger);
-      color: #fff;
-      border-color: var(--danger);
-      box-shadow: 0 0 0 3px var(--danger-glow);
-    }
-
-    .btn-docs {
-      background: var(--bg-input);
-      color: var(--accent);
-      border: 1px solid var(--accent);
-      padding: 8px 14px;
-      font-size: 0.85rem;
-      font-weight: bold;
-      text-decoration: none;
-      display: inline-block;
-    }
-
-    .btn-docs:hover {
-      background: var(--accent);
-      color: #000;
-      box-shadow: 0 0 0 3px var(--accent-glow);
-    }
-
-    #install-btn {
-      border-color: var(--accent);
-      color: var(--accent);
-      animation: pulse-cyan 2s infinite;
-    }
-
-    #install-btn[hidden] {
-      display: none !important;
-    }
-
-    @keyframes pulse-cyan {
-      0%   { box-shadow: 0 0 0 0 rgba(0, 229, 255, 0.35); }
-      70%  { box-shadow: 0 0 0 8px rgba(0, 229, 255, 0); }
-      100% { box-shadow: 0 0 0 0 rgba(0, 229, 255, 0); }
-    }
-
-    /* =========================
-       GRID + CARDS
-       ========================= */
-    .app-grid {
-      display: grid;
-      grid-template-columns: 1fr;
-      gap: 22px;
-      margin: 0 auto;
-    }
-
-    @media (min-width: 900px) {
-      .app-grid {
-        grid-template-columns: 1fr 1fr;
+        --tint-weak: rgba(100, 255, 255, 0.14);
       }
     }
 
-    .card {
-      background:
-        linear-gradient(180deg, rgba(255, 255, 255, 0.01), rgba(255, 255, 255, 0)),
-        var(--bg-card);
-      border: 1px solid var(--border-color);
-      border-radius: var(--radius);
-      padding: 22px;
-      display: flex;
-      flex-direction: column;
-      box-shadow: inset 0 0 0 1px rgba(102, 239, 255, 0.015);
-      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    *{ box-sizing:border-box; }
+    html,body{ height:100%; margin:0; padding:0; }
+    body{
+      background: var(--bg);
+      color: var(--label);
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      -webkit-font-smoothing: antialiased;
+      line-height: 1.35;
+      padding: calc(14px + var(--safe-top)) 14px calc(20px + var(--safe-bot));
     }
 
-    .card.is-invalid {
-      border-color: var(--danger);
-      box-shadow: 0 0 0 3px var(--danger-glow);
+    .container{ max-width: var(--maxw); margin:0 auto; }
+
+    .mono{
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      font-variant-numeric: tabular-nums;
+    }
+    .u{ font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, Helvetica, Arial, sans-serif; text-transform:none; }
+
+    .unit{ color: var(--secondary); font-weight: 700; font-size: 0.92em; }
+
+    /* ==========================================
+      Top Nav
+    ========================================== */
+    .nav{
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      padding: 10px 0;
+      margin-bottom: 12px;
+      background: var(--nav-bg);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border-bottom: 1px solid var(--stroke-2);
+    }
+    .nav-row{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap: 12px;
+    }
+    .brand{
+      display:flex;
+      gap: 12px;
+      align-items:center;
+      min-width:0;
+    }
+    .app-icon{
+      width:44px; height:44px;
+      border-radius:12px;
+      border:1px solid var(--stroke-3);
+      box-shadow: 0 8px 22px rgba(0,0,0,0.12);
+      background: var(--bg-elev);
+      object-fit: contain;
+      flex-shrink:0;
+    }
+    .brand-text{ min-width:0; }
+    .app-title{
+      margin:0;
+      font-size:1.25rem;
+      font-weight: 800;
+      letter-spacing:-0.01em;
+      line-height:1.1;
+    }
+    .app-subtitle{
+      margin-top:3px;
+      color: var(--secondary);
+      font-size:0.82rem;
+      font-weight:600;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
     }
 
-    .card-title {
-      margin: 0 0 16px 0;
-      color: var(--text-pri);
-      font-size: 1rem;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
+    .actions{
+      display:flex;
+      gap: 8px;
+      align-items:center;
+      flex-wrap:wrap;
+      justify-content:flex-end;
     }
 
-    .card-hint {
-      color: var(--text-dim);
-      font-size: 0.75rem;
-      margin: -4px 0 14px 0;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
+    .btn{
+      border:1px solid var(--stroke-2);
+      background: var(--btn-bg);
+      color: var(--label);
+      padding: 9px 12px;
+      border-radius: 12px;
+      font-weight: 800;
+      font-size: 0.86rem;
+      cursor:pointer;
+      transition: transform .10s ease, border-color .15s ease, background .15s ease;
+      text-decoration:none;
+      display:inline-flex;
+      gap: 8px;
+      align-items:center;
+      user-select:none;
+      white-space:nowrap;
+    }
+    .btn:active{ transform: scale(0.98); }
+
+    .btn-primary{
+      border-color: rgba(0, 229, 255, 0.45);
+      background: var(--tint);
+      color: #001014;
+    }
+    .btn-primary:hover{ filter: brightness(0.98); }
+
+    .btn-danger{
+      border-color: rgba(255, 59, 48, 0.45);
+      background: var(--danger-bg);
+      color: var(--danger);
     }
 
-    .input-group {
-      margin-bottom: 16px;
+    .btn-ghost{
+      background: transparent;
+      border-color: transparent;
+      padding: 9px 10px;
+    }
+    .btn-ghost:hover{
+      background: var(--btn-bg-ghost-hover);
+      border-color: var(--stroke-3);
     }
 
-    .row-group {
-      display: flex;
-      gap: 10px;
+    .btn-install[hidden]{ display:none !important; }
+
+    .icon{ width:16px; height:16px; display:inline-block; }
+
+    /* Segmented (language) */
+    .seg{
+      background: var(--bg-field);
+      border: 1px solid var(--stroke-2);
+      border-radius: 12px;
+      padding: 2px;
+      display: inline-flex;
+      gap: 2px;
       align-items: stretch;
     }
-
-    .row-group .grow {
-      flex: 1;
-    }
-
-    .row-group .shrink {
-      flex: 0.6;
-      min-width: 92px;
-    }
-
-    label {
-      display: block;
-      margin-bottom: 6px;
-      color: var(--text-sec);
-      font-size: 0.78rem;
-      font-weight: bold;
-      text-transform: uppercase;
-      letter-spacing: 0.04em;
-    }
-
-    input,
-    select {
-      width: 100%;
-      padding: 12px;
-      border-radius: var(--radius-sm);
-      border: 1px solid var(--border-color);
-      background: var(--bg-input);
-      color: var(--text-pri);
-      font-family: inherit;
-      font-size: 1rem;
-      outline: none;
-      transition: border-color 0.2s ease, box-shadow 0.2s ease;
-    }
-
-    input::placeholder {
-      color: #7e9097;
-    }
-
-    input:focus,
-    select:focus {
-      border-color: var(--accent);
-      box-shadow: 0 0 0 3px var(--accent-glow);
-    }
-
-    .btn-action {
-      width: 100%;
-      margin-top: auto;
-      padding: 14px;
-      background: var(--bg-input);
-      color: var(--accent);
-      border: 1px solid var(--accent);
-      font-weight: bold;
-      font-size: 0.9rem;
-      letter-spacing: 0.03em;
-    }
-
-    .btn-action:hover {
-      background: var(--accent);
-      color: #000;
-      box-shadow: 0 0 0 3px var(--accent-glow);
-    }
-
-    /* =========================
-       RESULTS
-       ========================= */
-    .results-box {
-      margin-top: 16px;
-      padding: 14px;
+    .seg button{
+      border:0;
+      background:transparent;
+      color: var(--secondary);
+      padding: 7px 10px;
       border-radius: 10px;
-      border: 1px dashed var(--accent);
-      background: var(--accent-glow);
-      text-align: center;
-      display: none;
-    }
-
-    .results-box.is-visible {
-      display: block;
-    }
-
-    .results-box.is-error {
-      border-color: var(--danger);
-      background: var(--danger-glow);
-    }
-
-    .res-label {
-      font-size: 0.78rem;
-      color: var(--text-sec);
-      text-transform: uppercase;
-      margin-bottom: 4px;
-      letter-spacing: 0.04em;
-    }
-
-    .res-val {
-      font-size: 1.55rem;
-      font-weight: bold;
-      color: var(--accent);
-      text-shadow: 0 0 10px rgba(0, 229, 255, 0.16);
-      word-break: break-word;
-    }
-
-    .results-box.is-error .res-val {
-      color: #ff8a80;
-      text-shadow: none;
-    }
-
-    /* =========================
-       FOOTER
-       ========================= */
-    .footer-info {
-      margin: 34px auto 18px auto;
-      padding-top: 18px;
-      border-top: 1px solid var(--border-color);
-    }
-
-    .author-box {
-      border-left: 3px solid var(--accent);
-      padding-left: 14px;
-      color: var(--text-sec);
+      cursor:pointer;
+      font-weight: 900;
       font-size: 0.82rem;
+      letter-spacing: -0.01em;
+      transition: background .12s ease, color .12s ease;
+      white-space:nowrap;
+    }
+    .seg button[aria-selected="true"]{
+      background: var(--bg-elev);
+      color: var(--label);
+      box-shadow: 0 6px 16px rgba(0,0,0,0.10);
     }
 
-    .author-box strong {
-      color: var(--text-pri);
+    /* ==========================================
+      Module tiles (2 blocks)
+    ========================================== */
+    .tiles{
+      display:grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+    .tile{
+      text-align:left;
+      border:1px solid var(--stroke-2);
+      border-radius: var(--radius);
+      background: var(--bg-elev);
+      padding: 12px;
+      box-shadow: 0 6px 18px rgba(0,0,0,0.06);
+      cursor:pointer;
+      transition: transform .12s ease, border-color .12s ease;
+      display:flex;
+      gap: 10px;
+      align-items:center;
+      min-width:0;
+    }
+    .tile:active{ transform: scale(0.99); }
+    .tile.active{
+      border-color: rgba(0, 229, 255, 0.55);
+      box-shadow: 0 0 0 4px var(--tint-weak);
+    }
+    .tile-badge{
+      width: 34px;
+      height: 34px;
+      border-radius: 12px;
+      background: var(--tint-weak);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      color: var(--tint);
+      font-weight: 900;
+      flex-shrink:0;
+    }
+    .tile-title{
+      font-weight: 900;
+      letter-spacing: -0.01em;
+      font-size: 0.96rem;
+      margin:0;
+    }
+    .tile-sub{
+      margin:2px 0 0;
+      color: var(--secondary);
+      font-size: 0.80rem;
+      font-weight: 600;
+      white-space: nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+    @media (max-width: 720px){
+      .tiles{ grid-template-columns: 1fr; }
     }
 
-    /* =========================
-       MOBILE
-       ========================= */
-    @media (max-width: 768px) {
-      body {
-        padding: 14px;
-      }
+    /* ==========================================
+      Panels + Cards
+    ========================================== */
+    .panel{ display:none; }
+    .panel.active{ display:block; }
 
-      .header-container {
-        flex-direction: column;
-        align-items: stretch;
-      }
+    .card{
+      background: var(--bg-elev);
+      border: 1px solid var(--stroke-2);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 16px;
+      overflow: hidden;
+    }
+    .card.invalid{
+      border-color: rgba(255,59,48,0.62);
+      box-shadow: 0 0 0 4px rgba(255,59,48,0.18);
+    }
 
-      .controls {
-        align-items: flex-start;
-      }
+    .card-header{
+      display:flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+    .card-h{
+      margin:0;
+      font-size: 1.08rem;
+      font-weight: 900;
+      letter-spacing: -0.01em;
+    }
+    .card-desc{
+      margin: 6px 0 0;
+      color: var(--secondary);
+      font-weight: 600;
+      font-size: 0.90rem;
+    }
 
-      .brand-logo {
-        width: 48px;
-        height: 48px;
-      }
+    .form{ display:grid; gap: 12px; }
+    .field-group{ display:grid; gap: 6px; }
+    label{
+      font-size: 0.85rem;
+      font-weight: 800;
+      color: var(--label);
+      letter-spacing: -0.01em;
+    }
+    .hint{
+      color: var(--secondary);
+      font-weight: 600;
+      font-size: 0.82rem;
+      margin-top: -2px;
+    }
+    input, select{
+      width:100%;
+      background: var(--bg-field);
+      border: 1px solid var(--stroke-2);
+      border-radius: 12px;
+      padding: 12px;
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--label);
+      outline:none;
+      transition: box-shadow .15s ease, border-color .15s ease;
+    }
+    input::placeholder{ color: var(--tertiary); font-weight: 700; }
+    input:focus, select:focus{
+      border-color: rgba(0,229,255,0.70);
+      box-shadow: 0 0 0 4px var(--tint-weak);
+    }
 
-      .header-title {
-        font-size: 1.45rem;
-      }
+    .grid-2{ display:grid; grid-template-columns: 1fr 1fr; gap:10px; }
+    .grid-2b{ display:grid; grid-template-columns: 1fr 140px; gap:10px; align-items: end; }
+    @media (max-width: 560px){
+      .grid-2, .grid-2b{ grid-template-columns: 1fr; }
+    }
+
+    .btn-block{
+      width:100%;
+      justify-content:center;
+      padding: 12px;
+      font-size: 0.95rem;
+      border-radius: 14px;
+    }
+
+    /* ==========================================
+      Results (iOS table-like)
+    ========================================== */
+    .result{
+      margin-top: 14px;
+      border-radius: var(--radius);
+      border: 1px solid var(--stroke-2);
+      background: var(--bg-elev);
+      overflow:hidden;
+      display:none;
+    }
+    .result.visible{ display:block; }
+    .result.error{
+      border-color: rgba(255,59,48,0.62);
+      box-shadow: 0 0 0 4px rgba(255,59,48,0.18);
+    }
+
+    .result-head{
+      padding: 12px 14px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap: 10px;
+      border-bottom: 1px solid var(--stroke-3);
+      background: var(--bg-field);
+    }
+    .result-title{
+      margin:0;
+      font-weight: 900;
+      letter-spacing:-0.01em;
+      font-size: 0.92rem;
+      color: var(--label);
+    }
+
+    .result-list{ padding:0; margin:0; list-style:none; }
+    .row{
+      display:grid;
+      grid-template-columns: 1fr auto;
+      gap: 12px;
+      align-items:center;
+      padding: 12px 14px;
+      border-bottom: 1px solid var(--stroke-3);
+    }
+    .row:last-child{ border-bottom:none; }
+    .k{ color: var(--secondary); font-weight: 800; font-size: 0.86rem; }
+    .v{ color: var(--label); font-weight: 900; font-size: 1.02rem; text-align:right; word-break: break-word; }
+    @media (max-width: 560px){
+      .row{ grid-template-columns: 1fr; }
+      .v{ text-align:left; }
+    }
+
+    details{
+      padding: 10px 14px 14px;
+      border-top: 1px solid var(--stroke-3);
+      background: var(--bg-elev);
+    }
+    details > summary{
+      cursor:pointer;
+      color: var(--tint);
+      font-weight: 900;
+      list-style:none;
+      outline:none;
+    }
+    details > summary::-webkit-details-marker{ display:none; }
+    .meta{
+      margin-top: 10px;
+      color: var(--secondary);
+      font-weight: 600;
+      font-size: 0.86rem;
+      line-height: 1.35;
+    }
+    .tags{ display:flex; flex-wrap:wrap; gap: 8px; margin-top: 10px; }
+    .tag{
+      display:inline-flex;
+      align-items:center;
+      padding: 6px 10px;
+      border-radius: 999px;
+      border:1px solid var(--stroke-3);
+      background: var(--bg-field);
+      color: var(--secondary);
+      font-weight: 800;
+      font-size: 0.78rem;
+      white-space:nowrap;
+    }
+
+    /* ==========================================
+      Bottom sheet (Info)
+    ========================================== */
+    .sheet-backdrop{
+      position:fixed;
+      inset:0;
+      background: rgba(0,0,0,0.35);
+      display:none;
+      align-items:flex-end;
+      justify-content:center;
+      z-index: 80;
+      padding: 12px;
+    }
+    .sheet-backdrop.open{ display:flex; }
+    .sheet{
+      width: min(720px, 100%);
+      max-height: 80vh;
+      background: var(--bg-elev);
+      border-radius: 18px;
+      border: 1px solid var(--stroke-2);
+      box-shadow: 0 18px 48px rgba(0,0,0,0.35);
+      overflow:hidden;
+      transform: translateY(12px);
+    }
+    .sheet-header{
+      padding: 14px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      border-bottom: 1px solid var(--stroke-3);
+      background: var(--bg-field);
+    }
+    .sheet-title{
+      margin:0;
+      font-weight: 900;
+      letter-spacing:-0.01em;
+      font-size: 1.02rem;
+    }
+    .sheet-body{
+      padding: 14px;
+      overflow:auto;
+    }
+    .section{
+      border:1px solid var(--stroke-3);
+      border-radius: 14px;
+      background: var(--bg-elev);
+      padding: 12px;
+      margin-bottom: 12px;
+    }
+    .section h4{
+      margin:0 0 6px 0;
+      font-size: 0.95rem;
+      font-weight: 900;
+      letter-spacing:-0.01em;
+    }
+    .section p{
+      margin:0;
+      color: var(--secondary);
+      font-weight: 600;
+      line-height: 1.45;
+      font-size: 0.90rem;
+    }
+    .formula{
+      margin-top: 10px;
+      padding: 10px 12px;
+      border-radius: 12px;
+      border: 1px solid rgba(0,229,255,0.30);
+      background: rgba(0,229,255,0.10);
+      font-weight: 900;
+      text-align:center;
+      color: var(--label);
+    }
+
+    footer{
+      margin-top: 16px;
+      color: var(--secondary);
+      font-size: 0.88rem;
+      font-weight: 600;
+      text-align:center;
+    }
+    footer strong{ color: var(--label); }
+
+    @media (prefers-reduced-motion: reduce){
+      *{ transition:none !important; }
+      .sheet{ transform:none !important; }
     }
   </style>
 </head>
+
 <body>
   <div class="container">
-    <!-- Header -->
-    <header class="header-container">
-      <div class="brand">
-        <img src="./icon-192.png" alt="MolarPrep logo" class="brand-logo" />
-        <div>
-          <h1 class="header-title">MolarPrep</h1>
-          <div class="header-subtitle">Host Cell Lab Tools</div>
-        </div>
-      </div>
-
-      <div class="controls">
-        <div class="lang-switch" aria-label="Language selector">
-          <button id="lang-es" class="active" type="button">ES</button>
-          <span aria-hidden="true"> | </span>
-          <button id="lang-en" type="button">EN</button>
+    <!-- NAV -->
+    <header class="nav" aria-label="MolarPrep navigation">
+      <div class="nav-row">
+        <div class="brand">
+          <img src="./icon-192.png" alt="MolarPrep" class="app-icon" />
+          <div class="brand-text">
+            <h1 class="app-title">MolarPrep</h1>
+            <div class="app-subtitle" data-i18n="subtitle">Host Cell Lab Suite · Fast molarity & stock calculations.</div>
+          </div>
         </div>
 
-        <a
-          href="https://github.com/ebalderasr/MolarPrep"
-          target="_blank"
-          rel="noopener noreferrer"
-          class="btn-docs"
-          id="btn-docs"
-          data-i18n="btnDocs"
-        >
-          [ Documentación ]
-        </a>
+        <div class="actions">
+          <button class="btn btn-ghost" id="btn-info" type="button" data-i18n="btnInfo" aria-label="Info">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <path d="M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20Z" stroke="currentColor" stroke-width="2"/>
+              <path d="M12 10v7" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+              <path d="M12 7h.01" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+            </svg>
+            <span>Info</span>
+          </button>
 
-        <button class="btn-clear" id="btn-clear" type="button" data-i18n="btnClear">
-          [ Limpiar ]
-        </button>
+          <a class="btn" href="https://github.com/ebalderasr/MolarPrep" target="_blank" rel="noopener noreferrer" data-i18n="btnDocs">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8l-5-5Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+              <path d="M14 3v5h5" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+            </svg>
+            <span>[ Repo ]</span>
+          </a>
 
-        <button class="btn-clear" id="install-btn" type="button" hidden data-i18n="btnInstall">
-          [ Instalar ]
-        </button>
+          <div class="seg" aria-label="Language selector">
+            <button id="lang-es" type="button" aria-selected="true">ES</button>
+            <button id="lang-en" type="button" aria-selected="false">EN</button>
+          </div>
+
+          <button class="btn btn-danger" id="btn-clear-all" type="button" data-i18n="btnClear">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <path d="M3 6h18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+              <path d="M8 6V4h8v2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+              <path d="M7 6l1 15h8l1-15" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+            </svg>
+            <span>[ Limpiar ]</span>
+          </button>
+
+          <button class="btn btn-primary btn-install" id="install-btn" type="button" hidden data-i18n="btnInstall">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <path d="M12 3v10" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+              <path d="M8 11l4 4 4-4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M4 20h16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+            <span>[ Instalar ]</span>
+          </button>
+        </div>
       </div>
     </header>
 
-
-
-    <!-- Main App -->
-    <main class="app-grid">
-      <!-- Card 1: Solids -->
-      <section class="card" id="card-solids">
-        <h2 class="card-title" data-i18n="card1Title">01. Reactivos Sólidos</h2>
-        <div class="card-hint" data-i18n="card1Hint">m = M × V × PM</div>
-
-        <div class="input-group">
-          <label for="s_mw" data-i18n="lblMW">Peso Molecular</label>
-          <input type="number" id="s_mw" placeholder="g/mol" min="0.0001" step="any" />
+    <!-- Module tiles -->
+    <div class="tiles" aria-label="Modules overview">
+      <button class="tile active" type="button" data-go="sol" aria-label="Solid reagents">
+        <div class="tile-badge mono">01</div>
+        <div style="min-width:0;">
+          <p class="tile-title" data-i18n="tile_sol">Solid reagents</p>
+          <p class="tile-sub" data-i18n="tile_sol_sub">m = M·V·MW</p>
         </div>
+      </button>
 
-        <div class="input-group">
-          <label for="s_m" data-i18n="lblMolarity">Molaridad Meta</label>
-          <div class="row-group">
-            <input class="grow" type="number" id="s_m" placeholder="0.0" min="0.0001" step="any" />
-            <select class="shrink" id="s_m_u" aria-label="Unidad de molaridad">
-              <option value="1">M</option>
-              <option value="0.001">mM</option>
-              <option value="0.000001">μM</option>
-              <option value="0.000000001">nM</option>
-            </select>
+      <button class="tile" type="button" data-go="liq" aria-label="Liquid reagents">
+        <div class="tile-badge mono">02</div>
+        <div style="min-width:0;">
+          <p class="tile-title" data-i18n="tile_liq">Liquid reagents</p>
+          <p class="tile-sub" data-i18n="tile_liq_sub">ρ + purity → M1 → V1</p>
+        </div>
+      </button>
+    </div>
+
+    <main>
+      <!-- PANEL: Solids -->
+      <section class="panel active" id="panel-sol" role="region" aria-label="Solid reagents">
+        <div class="card" id="card-solids">
+          <div class="card-header">
+            <div>
+              <h2 class="card-h" data-i18n="s_title">01. Solid reagents</h2>
+              <p class="card-desc" data-i18n="s_hint">Mass to weigh for a target molar solution</p>
+            </div>
           </div>
-        </div>
 
-        <div class="input-group">
-          <label for="s_v" data-i18n="lblVol">Volumen Final</label>
-          <div class="row-group">
-            <input class="grow" type="number" id="s_v" placeholder="0.0" min="0.0001" step="any" />
-            <select class="shrink" id="s_v_u" aria-label="Unidad de volumen">
-              <option value="1">L</option>
-              <option value="0.001">mL</option>
-            </select>
+          <div class="form">
+            <div class="field-group">
+              <label for="s_mw" data-i18n="lblMW">Molecular weight <span class="unit">(g/mol)</span></label>
+              <input type="number" id="s_mw" placeholder="e.g. 180.16" min="0.0001" step="any" />
+            </div>
+
+            <div class="field-group">
+              <label data-i18n="lblMolarity">Target molarity</label>
+              <div class="grid-2b">
+                <input type="number" id="s_m" placeholder="0.0" min="0.0001" step="any" />
+                <select id="s_m_u" aria-label="Molarity unit">
+                  <option value="1">M</option>
+                  <option value="0.001">mM</option>
+                  <option value="0.000001">μM</option>
+                  <option value="0.000000001">nM</option>
+                </select>
+              </div>
+              <div class="hint" data-i18n="s_unit_hint">Internally normalized to M.</div>
+            </div>
+
+            <div class="field-group">
+              <label data-i18n="lblVol">Final volume</label>
+              <div class="grid-2b">
+                <input type="number" id="s_v" placeholder="0.0" min="0.0001" step="any" />
+                <select id="s_v_u" aria-label="Volume unit">
+                  <option value="1">L</option>
+                  <option value="0.001">mL</option>
+                </select>
+              </div>
+              <div class="hint" data-i18n="s_vol_hint">Internally normalized to L.</div>
+            </div>
+
+            <button class="btn btn-primary btn-block" id="btn-calc-solids" type="button" data-i18n="btnCalcMass">Calculate mass</button>
+
+            <div class="result" id="res-solids" aria-live="polite">
+              <div class="result-head">
+                <p class="result-title" data-i18n="res_title">Results</p>
+              </div>
+              <ul class="result-list">
+                <li class="row">
+                  <div class="k" data-i18n="resMass">Required mass</div>
+                  <div class="v mono" id="out_mass">---</div>
+                </li>
+                <li class="row">
+                  <div class="k" data-i18n="resMass_g">Mass (g)</div>
+                  <div class="v mono" id="out_mass_g">---</div>
+                </li>
+              </ul>
+
+              <details>
+                <summary data-i18n="details">Details & assumptions</summary>
+                <div class="meta" id="solids-meta"></div>
+              </details>
+            </div>
           </div>
-        </div>
-
-        <button class="btn-action" id="btn-calc-solids" type="button" data-i18n="btnCalcMass">
-          Calcular Masa
-        </button>
-
-        <div class="results-box" id="box-mass" aria-live="polite">
-          <div class="res-label" data-i18n="resMass">Masa Requerida</div>
-          <div class="res-val" id="out_mass">---</div>
         </div>
       </section>
 
-      <!-- Card 2: Liquids -->
-      <section class="card" id="card-liquids">
-        <h2 class="card-title" data-i18n="card2Title">02. Reactivos Líquidos</h2>
-        <div class="card-hint" data-i18n="card2Hint">M1V1 = M2V2</div>
-
-        <div class="input-group">
-          <label data-i18n="lblStock">Densidad (ρ) y % Pureza</label>
-          <div class="row-group">
-            <input class="grow" type="number" id="l_rho" placeholder="g/mL" min="0.0001" step="any" />
-            <input class="grow" type="number" id="l_p" placeholder="%" min="0.0001" max="100" step="any" />
+      <!-- PANEL: Liquids -->
+      <section class="panel" id="panel-liq" role="region" aria-label="Liquid reagents">
+        <div class="card" id="card-liquids">
+          <div class="card-header">
+            <div>
+              <h2 class="card-h" data-i18n="l_title">02. Liquid reagents</h2>
+              <p class="card-desc" data-i18n="l_hint">Stock volume from density and purity</p>
+            </div>
           </div>
-        </div>
 
-        <div class="input-group">
-          <label for="l_mw" data-i18n="lblMW">Peso Molecular</label>
-          <input type="number" id="l_mw" placeholder="g/mol" min="0.0001" step="any" />
-        </div>
+          <div class="form">
+            <div class="field-group">
+              <label data-i18n="lblStock">Density (ρ) and purity</label>
+              <div class="grid-2">
+                <div class="field-group">
+                  <label class="unit" for="l_rho" data-i18n="l_rho">ρ (g/mL)</label>
+                  <input type="number" id="l_rho" placeholder="e.g. 1.18" min="0.0001" step="any" />
+                </div>
+                <div class="field-group">
+                  <label class="unit" for="l_p" data-i18n="l_p">Purity (%)</label>
+                  <input type="number" id="l_p" placeholder="e.g. 98" min="0.0001" max="100" step="any" />
+                </div>
+              </div>
+            </div>
 
-        <div class="row-group">
-          <div class="input-group grow">
-            <label for="l_m2" data-i18n="lblTargetM">M Meta (M)</label>
-            <input type="number" id="l_m2" placeholder="0.0" min="0.0001" step="any" />
+            <div class="field-group">
+              <label for="l_mw" data-i18n="lblMW">Molecular weight <span class="unit">(g/mol)</span></label>
+              <input type="number" id="l_mw" placeholder="e.g. 98.08" min="0.0001" step="any" />
+            </div>
+
+            <div class="field-group">
+              <label data-i18n="l_targets">Targets</label>
+              <div class="grid-2">
+                <div class="field-group">
+                  <label for="l_m2" data-i18n="lblTargetM">Target M (M)</label>
+                  <input type="number" id="l_m2" placeholder="0.0" min="0.0001" step="any" />
+                </div>
+                <div class="field-group">
+                  <label for="l_v2" data-i18n="lblTargetV">Target V (mL)</label>
+                  <input type="number" id="l_v2" placeholder="0.0" min="0.0001" step="any" />
+                </div>
+              </div>
+              <div class="hint" data-i18n="l_unit_hint">V is normalized to L for the internal calculation.</div>
+            </div>
+
+            <button class="btn btn-primary btn-block" id="btn-calc-liquids" type="button" data-i18n="btnCalcStock">Calculate stock volume</button>
+
+            <div class="result" id="res-liquids" aria-live="polite">
+              <div class="result-head">
+                <p class="result-title" data-i18n="res_title">Results</p>
+              </div>
+              <ul class="result-list">
+                <li class="row">
+                  <div class="k" data-i18n="resVol">Stock volume</div>
+                  <div class="v mono" id="out_vol">---</div>
+                </li>
+                <li class="row">
+                  <div class="k" data-i18n="resVol_L">Volume (L)</div>
+                  <div class="v mono" id="out_vol_L">---</div>
+                </li>
+                <li class="row">
+                  <div class="k" data-i18n="resM1">Estimated stock molarity (M1)</div>
+                  <div class="v mono" id="out_m1">---</div>
+                </li>
+              </ul>
+
+              <details>
+                <summary data-i18n="details">Details & assumptions</summary>
+                <div class="meta" id="liquids-meta"></div>
+              </details>
+            </div>
           </div>
-          <div class="input-group grow">
-            <label for="l_v2" data-i18n="lblTargetV">V Meta (mL)</label>
-            <input type="number" id="l_v2" placeholder="0.0" min="0.0001" step="any" />
-          </div>
-        </div>
-
-        <button class="btn-action" id="btn-calc-liquids" type="button" data-i18n="btnCalcStock">
-          Calcular Stock
-        </button>
-
-        <div class="results-box" id="box-vol" aria-live="polite">
-          <div class="res-label" data-i18n="resVol">Volumen de Stock</div>
-          <div class="res-val" id="out_vol">---</div>
         </div>
       </section>
     </main>
 
-    <!-- Footer -->
-    <footer class="footer-info">
-      <div class="author-box">
-        <strong data-i18n="lblAuthor">Autor: Emiliano Balderas</strong><br />
-        <span data-i18n="authorBio">
-          Ingeniero en Biotecnología | Estudiante de Doctorado en Bioquímica, IBt-UNAM
-        </span>
-      </div>
+    <footer>
+      <strong data-i18n="author">Autor: Emiliano Balderas</strong><br />
+      <span data-i18n="authorBio">Ingeniero en Biotecnología · Doctorado en Bioquímica · IBt-UNAM · Host Cell Lab Suite</span>
     </footer>
+  </div>
+
+  <!-- Info sheet -->
+  <div class="sheet-backdrop" id="sheet-backdrop" role="dialog" aria-modal="true" aria-labelledby="sheet-title" aria-hidden="true">
+    <div class="sheet" role="document">
+      <div class="sheet-header">
+        <h3 class="sheet-title" id="sheet-title" data-i18n="info_title">Scientific fundamentals & warnings</h3>
+        <button class="btn btn-ghost" id="btn-close-sheet" type="button" data-i18n="btnClose"><span>Close</span></button>
+      </div>
+      <div class="sheet-body">
+        <div class="section">
+          <h4 data-i18n="info_sol_title">Solid reagents</h4>
+          <p data-i18n="info_sol_p">Mass is computed from the target molarity (M), final volume (L), and molecular weight (g/mol).</p>
+          <div class="formula mono">m (g) = M · V · MW</div>
+          <p style="margin-top:10px;" data-i18n="info_units">Outputs are auto-formatted with practical prefixes: g → mg → μg, L → mL → μL.</p>
+        </div>
+
+        <div class="section">
+          <h4 data-i18n="info_liq_title">Liquid reagents</h4>
+          <p data-i18n="info_liq_p">For concentrated liquids, stock molarity is estimated using density and purity, then used to compute the required stock volume.</p>
+          <div class="formula mono">M1 = (P · ρ · 1000) / MW</div>
+          <div class="formula mono">V1 = (M2 · V2) / M1</div>
+        </div>
+
+        <div class="section">
+          <h4 data-i18n="info_warn_title">Practical warnings</h4>
+          <p data-i18n="info_warn_p">This tool is a calculation aid. Always verify units, reagent labels, and SOP constraints before preparing solutions.</p>
+        </div>
+      </div>
+    </div>
   </div>
 
   <script>
     /**
-     * ============================
-     * MolarPrep Front-End Script
-     * ============================
-     * Goals:
-     * - Keep calculation logic simple and easy to edit
-     * - Separate UI helpers from math functions
-     * - Make translations explicit and centralized
+     * MolarPrep | iOS-like UI refresh
+     * - Keeps original calculation logic
+     * - Adds HostCell suite UI (PulseGrowth-like)
      */
 
     const APP = {
-      defaultLanguage: "es",
-      currentLanguage: "es",
-      deferredInstallPrompt: null,
+      lang: "es",
+      activeTab: "sol",
+      deferredInstallPrompt: null
     };
 
     const I18N = {
       es: {
-        btnDocs: "[ Documentación ]",
+        subtitle: "Host Cell Lab Suite · Preparación rápida de soluciones.",
+        btnDocs: "[ Repo ]",
         btnClear: "[ Limpiar ]",
         btnInstall: "[ Instalar ]",
+        btnInfo: "Info",
+        btnClose: "Cerrar",
 
-        card1Title: "01. Reactivos Sólidos",
-        card1Hint: "m = M × V × PM",
-        card2Title: "02. Reactivos Líquidos",
-        card2Hint: "M1V1 = M2V2",
+        tile_sol: "Reactivos sólidos",
+        tile_sol_sub: "m = M·V·PM",
+        tile_liq: "Reactivos líquidos",
+        tile_liq_sub: "ρ + pureza → M1 → V1",
 
-        lblMW: "Peso Molecular",
-        lblMolarity: "Molaridad Meta",
-        lblVol: "Volumen Final",
-        lblStock: "Densidad (ρ) y % Pureza",
-        lblTargetM: "M Meta (M)",
-        lblTargetV: "V Meta (mL)",
+        res_title: "Resultados",
+        details: "Detalles y supuestos",
 
-        btnCalcMass: "Calcular Masa",
-        btnCalcStock: "Calcular Stock",
+        s_title: "01. Reactivos sólidos",
+        s_hint: "Masa a pesar para una solución molar meta",
+        s_unit_hint: "Se normaliza internamente a M.",
+        s_vol_hint: "Se normaliza internamente a L.",
 
-        resMass: "Masa Requerida",
-        resVol: "Volumen de Stock",
+        l_title: "02. Reactivos líquidos",
+        l_hint: "Volumen de stock con densidad y pureza",
+        l_targets: "Metas",
+        l_unit_hint: "V se normaliza internamente a L.",
+        l_rho: "ρ (g/mL)",
+        l_p: "Pureza (%)",
 
-        lblAuthor: "Autor: Emiliano Balderas",
-        authorBio: "Ingeniero en Biotecnología | Estudiante de Doctorado en Bioquímica, IBt-UNAM",
+        lblMW: "Peso molecular <span class=\"unit\">(g/mol)</span>",
+        lblMolarity: "Molaridad meta",
+        lblVol: "Volumen final",
+        lblStock: "Densidad (ρ) y % pureza",
+        lblTargetM: "M meta (M)",
+        lblTargetV: "V meta (mL)",
+
+        btnCalcMass: "Calcular masa",
+        btnCalcStock: "Calcular stock",
+
+        resMass: "Masa requerida",
+        resMass_g: "Masa (g)",
+        resVol: "Volumen de stock",
+        resVol_L: "Volumen (L)",
+        resM1: "Molaridad estimada del stock (M1)",
+
+        info_title: "Fundamentos y advertencias",
+        info_sol_title: "Reactivos sólidos",
+        info_sol_p: "La masa se calcula con molaridad (M), volumen final (L) y peso molecular (g/mol).",
+        info_liq_title: "Reactivos líquidos",
+        info_liq_p: "Para líquidos concentrados, se estima la molaridad del stock con densidad y pureza, y luego se calcula el volumen requerido.",
+        info_units: "La salida se auto-formatea: g → mg → μg, L → mL → μL.",
+        info_warn_title: "Advertencias prácticas",
+        info_warn_p: "Esta herramienta es un apoyo. Verifica unidades, etiquetas y SOPs antes de preparar soluciones.",
+
+        author: "Autor: Emiliano Balderas",
+        authorBio: "Ingeniero en Biotecnología · Doctorado en Bioquímica · IBt-UNAM · Host Cell Lab Suite",
 
         err: "ERR",
+        err_inputs: "Revisa los campos: deben ser positivos y válidos.",
+        err_purity: "La pureza debe ser >0 y ≤100."
       },
 
       en: {
-        btnDocs: "[ Documentation ]",
+        subtitle: "Host Cell Lab Suite · Fast molarity & stock calculations.",
+        btnDocs: "[ Repo ]",
         btnClear: "[ Clear ]",
         btnInstall: "[ Install ]",
+        btnInfo: "Info",
+        btnClose: "Close",
 
-        card1Title: "01. Solid Reagents",
-        card1Hint: "m = M × V × MW",
-        card2Title: "02. Liquid Reagents",
-        card2Hint: "M1V1 = M2V2",
+        tile_sol: "Solid reagents",
+        tile_sol_sub: "m = M·V·MW",
+        tile_liq: "Liquid reagents",
+        tile_liq_sub: "ρ + purity → M1 → V1",
 
-        lblMW: "Molecular Weight",
-        lblMolarity: "Target Molarity",
-        lblVol: "Final Volume",
-        lblStock: "Density (ρ) and % Purity",
+        res_title: "Results",
+        details: "Details & assumptions",
+
+        s_title: "01. Solid reagents",
+        s_hint: "Mass to weigh for a target molar solution",
+        s_unit_hint: "Internally normalized to M.",
+        s_vol_hint: "Internally normalized to L.",
+
+        l_title: "02. Liquid reagents",
+        l_hint: "Stock volume from density and purity",
+        l_targets: "Targets",
+        l_unit_hint: "V is normalized to L for the internal calculation.",
+        l_rho: "ρ (g/mL)",
+        l_p: "Purity (%)",
+
+        lblMW: "Molecular weight <span class=\"unit\">(g/mol)</span>",
+        lblMolarity: "Target molarity",
+        lblVol: "Final volume",
+        lblStock: "Density (ρ) and % purity",
         lblTargetM: "Target M (M)",
         lblTargetV: "Target V (mL)",
 
-        btnCalcMass: "Calculate Mass",
-        btnCalcStock: "Calculate Stock",
+        btnCalcMass: "Calculate mass",
+        btnCalcStock: "Calculate stock",
 
-        resMass: "Required Mass",
-        resVol: "Stock Volume",
+        resMass: "Required mass",
+        resMass_g: "Mass (g)",
+        resVol: "Stock volume",
+        resVol_L: "Volume (L)",
+        resM1: "Estimated stock molarity (M1)",
 
-        lblAuthor: "Author: Emiliano Balderas",
-        authorBio: "Biotechnology Engineer | PhD Student in Biochemistry, IBt-UNAM",
+        info_title: "Scientific fundamentals & warnings",
+        info_sol_title: "Solid reagents",
+        info_sol_p: "Mass is computed from target molarity (M), final volume (L), and molecular weight (g/mol).",
+        info_liq_title: "Liquid reagents",
+        info_liq_p: "For concentrated liquids, stock molarity is estimated using density and purity, then used to compute the required stock volume.",
+        info_units: "Outputs are auto-formatted: g → mg → μg, L → mL → μL.",
+        info_warn_title: "Practical warnings",
+        info_warn_p: "This tool is a calculation aid. Always verify units, labels, and SOP constraints before preparing solutions.",
+
+        author: "Author: Emiliano Balderas",
+        authorBio: "Biotechnology Engineer · PhD Student in Biochemistry · IBt-UNAM · Host Cell Lab Suite",
 
         err: "ERR",
-      },
+        err_inputs: "Check inputs: values must be positive and valid.",
+        err_purity: "Purity must be >0 and ≤100."
+      }
     };
 
-    /**
-     * DOM map
-     * Keep IDs here to make maintenance easier.
-     */
     const DOM = {
-      // language
       langEs: document.getElementById("lang-es"),
       langEn: document.getElementById("lang-en"),
 
-      // buttons
-      btnClear: document.getElementById("btn-clear"),
+      btnClearAll: document.getElementById("btn-clear-all"),
       btnInstall: document.getElementById("install-btn"),
-      btnCalcSolids: document.getElementById("btn-calc-solids"),
-      btnCalcLiquids: document.getElementById("btn-calc-liquids"),
+      btnInfo: document.getElementById("btn-info"),
 
-      // cards
-      cardSolids: document.getElementById("card-solids"),
-      cardLiquids: document.getElementById("card-liquids"),
+      sheetBackdrop: document.getElementById("sheet-backdrop"),
+      btnCloseSheet: document.getElementById("btn-close-sheet"),
 
-      // solids inputs
+      tiles: Array.from(document.querySelectorAll("[data-go]")),
+      panels: {
+        sol: document.getElementById("panel-sol"),
+        liq: document.getElementById("panel-liq")
+      },
+
+      cards: {
+        solids: document.getElementById("card-solids"),
+        liquids: document.getElementById("card-liquids")
+      },
+
+      // solids
       s_mw: document.getElementById("s_mw"),
       s_m: document.getElementById("s_m"),
       s_m_u: document.getElementById("s_m_u"),
       s_v: document.getElementById("s_v"),
       s_v_u: document.getElementById("s_v_u"),
+      btnCalcSolids: document.getElementById("btn-calc-solids"),
+      resSolids: document.getElementById("res-solids"),
+      outMass: document.getElementById("out_mass"),
+      outMassG: document.getElementById("out_mass_g"),
+      solidsMeta: document.getElementById("solids-meta"),
 
-      // liquids inputs
+      // liquids
       l_rho: document.getElementById("l_rho"),
       l_p: document.getElementById("l_p"),
       l_mw: document.getElementById("l_mw"),
       l_m2: document.getElementById("l_m2"),
       l_v2: document.getElementById("l_v2"),
-
-      // outputs
-      boxMass: document.getElementById("box-mass"),
-      outMass: document.getElementById("out_mass"),
-      boxVol: document.getElementById("box-vol"),
+      btnCalcLiquids: document.getElementById("btn-calc-liquids"),
+      resLiquids: document.getElementById("res-liquids"),
       outVol: document.getElementById("out_vol"),
+      outVolL: document.getElementById("out_vol_L"),
+      outM1: document.getElementById("out_m1"),
+      liquidsMeta: document.getElementById("liquids-meta")
     };
 
-    /* =========================
-       Utility functions
-       ========================= */
-
-    function t(key) {
-      const langPack = I18N[APP.currentLanguage] || I18N[APP.defaultLanguage];
-      return langPack[key] ?? key;
+    /* ---------- i18n ---------- */
+    function t(key){
+      const pack = I18N[APP.lang] || I18N.es;
+      return pack[key] ?? key;
     }
 
-    function parsePositiveNumber(element) {
-      const value = Number.parseFloat(element.value);
-      return Number.isFinite(value) ? value : NaN;
-    }
+    function applyTranslations(lang){
+      const pack = I18N[lang] || I18N.es;
 
-    function isPositiveFinite(value) {
-      return Number.isFinite(value) && value > 0;
-    }
-
-    /**
-     * Auto-format values in g/L using metric prefixes.
-     * Examples:
-     * - 0.0023 g -> 2.30 mg
-     * - 0.0000008 L -> 0.80 µL
-     */
-    function formatWithMetricPrefix(value, unit) {
-      if (!isPositiveFinite(value)) return t("err");
-
-      if (value >= 1) {
-        return `${value.toFixed(3)} <span class="u">${unit}</span>`;
-      }
-
-      if (value >= 1e-3) {
-        return `${(value * 1e3).toFixed(2)} <span class="u">m${unit}</span>`;
-      }
-
-      return `${(value * 1e6).toFixed(2)} <span class="u">μ${unit}</span>`;
-    }
-
-    function setCardValidity(cardElement, isValid) {
-      cardElement.classList.toggle("is-invalid", !isValid);
-    }
-
-    function showResult(resultBox, outputElement, html, { isError = false } = {}) {
-      outputElement.innerHTML = html;
-      resultBox.classList.add("is-visible");
-      resultBox.classList.toggle("is-error", isError);
-    }
-
-    function hideResult(resultBox, outputElement) {
-      outputElement.textContent = "---";
-      resultBox.classList.remove("is-visible", "is-error");
-    }
-
-    function clearAllResults() {
-      hideResult(DOM.boxMass, DOM.outMass);
-      hideResult(DOM.boxVol, DOM.outVol);
-      setCardValidity(DOM.cardSolids, true);
-      setCardValidity(DOM.cardLiquids, true);
-    }
-
-    function clearInputs() {
-      document.querySelectorAll("input").forEach((input) => {
-        input.value = "";
+      document.querySelectorAll("[data-i18n]").forEach((node) => {
+        const key = node.getAttribute("data-i18n");
+        if (pack[key]) node.innerHTML = pack[key];
       });
 
-      // Reset select defaults (optional, easy to edit here)
-      DOM.s_m_u.value = "1";     // M
-      DOM.s_v_u.value = "1";     // L
+      DOM.langEs.setAttribute("aria-selected", String(lang === "es"));
+      DOM.langEn.setAttribute("aria-selected", String(lang === "en"));
     }
 
-    function resetApp() {
-      clearInputs();
-      clearAllResults();
+    function setLanguage(lang){
+      if (!I18N[lang]) return;
+      APP.lang = lang;
+      applyTranslations(lang);
+      try { localStorage.setItem("molarprep_lang", lang); } catch (_) {}
     }
 
-    /* =========================
-       Calculation logic
-       ========================= */
+    function loadSavedLanguage(){
+      try {
+        const saved = localStorage.getItem("molarprep_lang");
+        if (saved && I18N[saved]) APP.lang = saved;
+      } catch (_) {}
+    }
 
-    /**
-     * Solids calculation
-     * mass (g) = target_molarity (M) * final_volume (L) * molecular_weight (g/mol)
-     */
-    function calculateSolids() {
-      const molecularWeight = parsePositiveNumber(DOM.s_mw);
-      const targetMolarityValue = parsePositiveNumber(DOM.s_m);
+    /* ---------- Tabs ---------- */
+    function setActiveTab(key){
+      if (!DOM.panels[key]) return;
+      APP.activeTab = key;
+
+      Object.entries(DOM.panels).forEach(([k, el]) => el.classList.toggle("active", k === key));
+      DOM.tiles.forEach((tile) => tile.classList.toggle("active", tile.dataset.go === key));
+
+      try { localStorage.setItem("molarprep_tab", key); } catch (_) {}
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    function loadSavedTab(){
+      try {
+        const saved = localStorage.getItem("molarprep_tab");
+        if (saved && DOM.panels[saved]) APP.activeTab = saved;
+      } catch (_) {}
+    }
+
+    /* ---------- Utilities ---------- */
+    function parseNum(el){
+      const v = Number.parseFloat(el.value);
+      return Number.isFinite(v) ? v : NaN;
+    }
+
+    function isPositiveFinite(v){
+      return Number.isFinite(v) && v > 0;
+    }
+
+    function setCardValidity(cardEl, isValid=true){
+      cardEl.classList.toggle("invalid", !isValid);
+    }
+
+    function showBox(boxEl, mode="normal"){
+      boxEl.classList.add("visible");
+      boxEl.classList.remove("error");
+      if (mode === "error") boxEl.classList.add("error");
+    }
+
+    function hideBox(boxEl){
+      boxEl.classList.remove("visible","error");
+    }
+
+    function formatNumber(value, decimals=6){
+      if (!Number.isFinite(value)) return t("err");
+      const abs = Math.abs(value);
+      if (abs >= 1000 || (abs > 0 && abs < 0.000001)) return value.toExponential(3);
+      return value.toFixed(decimals).replace(/\.?0+$/, "");
+    }
+
+    // Auto-format outputs with metric prefixes: g -> mg -> µg, L -> mL -> µL
+    function formatWithMetricPrefix(value, unit){
+      if (!isPositiveFinite(value)) return t("err");
+      if (value >= 1) return `${value.toFixed(3)} <span class="u">${unit}</span>`;
+      if (value >= 1e-3) return `${(value*1e3).toFixed(2)} <span class="u">m${unit}</span>`;
+      return `${(value*1e6).toFixed(2)} <span class="u">μ${unit}</span>`;
+    }
+
+    /* ---------- Calculations (same logic as original) ---------- */
+    function calculateSolids(){
+      const molecularWeight = parseNum(DOM.s_mw);
+      const targetMolarityValue = parseNum(DOM.s_m);
       const targetMolarityUnitFactor = Number.parseFloat(DOM.s_m_u.value);
-      const finalVolumeValue = parsePositiveNumber(DOM.s_v);
+      const finalVolumeValue = parseNum(DOM.s_v);
       const finalVolumeUnitFactor = Number.parseFloat(DOM.s_v_u.value);
 
       const targetMolarity_M = targetMolarityValue * targetMolarityUnitFactor;
       const finalVolume_L = finalVolumeValue * finalVolumeUnitFactor;
 
-      const inputsAreValid = [
-        molecularWeight,
-        targetMolarity_M,
-        finalVolume_L,
-      ].every(isPositiveFinite);
+      const inputsAreValid = [molecularWeight, targetMolarity_M, finalVolume_L].every(isPositiveFinite);
 
-      setCardValidity(DOM.cardSolids, inputsAreValid);
+      setCardValidity(DOM.cards.solids, inputsAreValid);
 
-      if (!inputsAreValid) {
-        showResult(DOM.boxMass, DOM.outMass, t("err"), { isError: true });
+      if (!inputsAreValid){
+        showBox(DOM.resSolids, "error");
+        DOM.outMass.textContent = t("err");
+        DOM.outMassG.textContent = t("err");
+        DOM.solidsMeta.textContent = t("err_inputs");
         return;
       }
 
       const requiredMass_g = targetMolarity_M * finalVolume_L * molecularWeight;
-      const formatted = formatWithMetricPrefix(requiredMass_g, "g");
-      showResult(DOM.boxMass, DOM.outMass, formatted);
+
+      showBox(DOM.resSolids);
+      DOM.outMass.innerHTML = formatWithMetricPrefix(requiredMass_g, "g");
+      DOM.outMassG.textContent = formatNumber(requiredMass_g, 6);
+
+      DOM.solidsMeta.innerHTML = `
+        <div class="tags">
+          <span class="tag">M = ${formatNumber(targetMolarity_M, 6)} <span class="u">M</span></span>
+          <span class="tag">V = ${formatNumber(finalVolume_L, 6)} <span class="u">L</span></span>
+          <span class="tag">MW = ${formatNumber(molecularWeight, 4)} <span class="u">g/mol</span></span>
+          <span class="tag mono">m = M·V·MW</span>
+        </div>
+      `;
     }
 
-    /**
-     * Liquids calculation (concentrated liquid stock)
-     *
-     * Stock concentration in M:
-     * M1 = (purity_fraction * density_g_per_mL * 1000 mL/L) / MW_g_per_mol
-     *
-     * Desired stock volume:
-     * V1 = (M2 * V2) / M1
-     * Where:
-     * - M2 in M
-     * - V2 in L
-     * - V1 returned in L
-     */
-    function calculateLiquids() {
-      const density_g_mL = parsePositiveNumber(DOM.l_rho);
-      const purity_percent = parsePositiveNumber(DOM.l_p);
-      const molecularWeight = parsePositiveNumber(DOM.l_mw);
-      const targetMolarity_M = parsePositiveNumber(DOM.l_m2);
-      const targetVolume_mL = parsePositiveNumber(DOM.l_v2);
+    function calculateLiquids(){
+      const density_g_mL = parseNum(DOM.l_rho);
+      const purity_percent = parseNum(DOM.l_p);
+      const molecularWeight = parseNum(DOM.l_mw);
+      const targetMolarity_M = parseNum(DOM.l_m2);
+      const targetVolume_mL = parseNum(DOM.l_v2);
 
+      const purityIsValid = isPositiveFinite(purity_percent) && purity_percent <= 100;
       const purity_fraction = purity_percent / 100;
       const targetVolume_L = targetVolume_mL / 1000;
 
-      const purityIsValid = isPositiveFinite(purity_percent) && purity_percent <= 100;
-
       const inputsAreValid =
-        [density_g_mL, molecularWeight, targetMolarity_M, targetVolume_L].every(isPositiveFinite) &&
-        purityIsValid;
+        [density_g_mL, molecularWeight, targetMolarity_M, targetVolume_L].every(isPositiveFinite) && purityIsValid;
 
-      setCardValidity(DOM.cardLiquids, inputsAreValid);
+      setCardValidity(DOM.cards.liquids, inputsAreValid);
 
-      if (!inputsAreValid) {
-        showResult(DOM.boxVol, DOM.outVol, t("err"), { isError: true });
+      if (!inputsAreValid){
+        showBox(DOM.resLiquids, "error");
+        DOM.outVol.textContent = t("err");
+        DOM.outVolL.textContent = t("err");
+        DOM.outM1.textContent = t("err");
+        DOM.liquidsMeta.textContent = purityIsValid ? t("err_inputs") : t("err_purity");
         return;
       }
 
       const stockMolarity_M = (purity_fraction * density_g_mL * 1000) / molecularWeight;
-
-      if (!isPositiveFinite(stockMolarity_M)) {
-        showResult(DOM.boxVol, DOM.outVol, t("err"), { isError: true });
+      if (!isPositiveFinite(stockMolarity_M)){
+        showBox(DOM.resLiquids, "error");
+        DOM.outVol.textContent = t("err");
+        DOM.outVolL.textContent = t("err");
+        DOM.outM1.textContent = t("err");
+        DOM.liquidsMeta.textContent = t("err_inputs");
         return;
       }
 
       const requiredStockVolume_L = (targetMolarity_M * targetVolume_L) / stockMolarity_M;
-      const formatted = formatWithMetricPrefix(requiredStockVolume_L, "L");
-      showResult(DOM.boxVol, DOM.outVol, formatted);
+
+      showBox(DOM.resLiquids);
+      DOM.outVol.innerHTML = formatWithMetricPrefix(requiredStockVolume_L, "L");
+      DOM.outVolL.textContent = formatNumber(requiredStockVolume_L, 8);
+      DOM.outM1.textContent = formatNumber(stockMolarity_M, 4);
+
+      DOM.liquidsMeta.innerHTML = `
+        <div class="tags">
+          <span class="tag">ρ = ${formatNumber(density_g_mL, 4)} <span class="u">g/mL</span></span>
+          <span class="tag">P = ${formatNumber(purity_percent, 2)}<span class="u">%</span></span>
+          <span class="tag">MW = ${formatNumber(molecularWeight, 4)} <span class="u">g/mol</span></span>
+          <span class="tag mono">M1 = (P·ρ·1000)/MW</span>
+          <span class="tag mono">V1 = (M2·V2)/M1</span>
+        </div>
+      `;
     }
 
-    /* =========================
-       Internationalization (i18n)
-       ========================= */
+    /* ---------- Clear all ---------- */
+    function clearAll(){
+      // inputs
+      [DOM.s_mw, DOM.s_m, DOM.s_v, DOM.l_rho, DOM.l_p, DOM.l_mw, DOM.l_m2, DOM.l_v2].forEach((el)=>{ el.value=""; });
 
-    function applyTranslations(language) {
-      const langPack = I18N[language] || I18N[APP.defaultLanguage];
+      // selects
+      DOM.s_m_u.value = "1";
+      DOM.s_v_u.value = "1";
 
-      document.querySelectorAll("[data-i18n]").forEach((node) => {
-        const key = node.getAttribute("data-i18n");
-        if (langPack[key]) {
-          node.innerHTML = langPack[key];
-        }
-      });
+      // results + validity
+      hideBox(DOM.resSolids);
+      hideBox(DOM.resLiquids);
 
-      DOM.langEs.classList.toggle("active", language === "es");
-      DOM.langEn.classList.toggle("active", language === "en");
+      setCardValidity(DOM.cards.solids, true);
+      setCardValidity(DOM.cards.liquids, true);
+
+      // outputs
+      DOM.outMass.textContent = "---";
+      DOM.outMassG.textContent = "---";
+      DOM.solidsMeta.textContent = "";
+
+      DOM.outVol.textContent = "---";
+      DOM.outVolL.textContent = "---";
+      DOM.outM1.textContent = "---";
+      DOM.liquidsMeta.textContent = "";
     }
 
-    function setLanguage(language) {
-      if (!I18N[language]) return;
-      APP.currentLanguage = language;
-      applyTranslations(language);
-
-      // Save preference (safe to remove if not needed)
-      try {
-        localStorage.setItem("molarprep_lang", language);
-      } catch (_) {
-        /* no-op */
-      }
+    /* ---------- Info sheet ---------- */
+    function openSheet(){
+      DOM.sheetBackdrop.classList.add("open");
+      DOM.sheetBackdrop.setAttribute("aria-hidden", "false");
+    }
+    function closeSheet(){
+      DOM.sheetBackdrop.classList.remove("open");
+      DOM.sheetBackdrop.setAttribute("aria-hidden", "true");
     }
 
-    function loadSavedLanguage() {
-      try {
-        const saved = localStorage.getItem("molarprep_lang");
-        if (saved && I18N[saved]) {
-          APP.currentLanguage = saved;
-        }
-      } catch (_) {
-        /* no-op */
-      }
-    }
-
-    /* =========================
-       PWA Install + Service Worker
-       ========================= */
-
-    function setupInstallPrompt() {
+    /* ---------- PWA install + SW ---------- */
+    function setupInstallPrompt(){
       window.addEventListener("beforeinstallprompt", (event) => {
         event.preventDefault();
         APP.deferredInstallPrompt = event;
@@ -905,18 +1236,18 @@
 
       DOM.btnInstall.addEventListener("click", async () => {
         if (!APP.deferredInstallPrompt) return;
-
         APP.deferredInstallPrompt.prompt();
         APP.deferredInstallPrompt = null;
+        DOM.btnInstall.hidden = true;
+      });
 
-        // Hide button after prompt; can reappear if browser emits event again
+      window.addEventListener("appinstalled", () => {
         DOM.btnInstall.hidden = true;
       });
     }
 
-    function registerServiceWorker() {
+    function registerServiceWorker(){
       if (!("serviceWorker" in navigator)) return;
-
       window.addEventListener("load", () => {
         navigator.serviceWorker.register("./sw.js").catch((error) => {
           console.warn("SW registration failed:", error);
@@ -924,67 +1255,71 @@
       });
     }
 
-    /* =========================
-       Event binding
-       ========================= */
-
-    function bindEvents() {
-      // Language toggles
+    /* ---------- Events ---------- */
+    function bindEvents(){
+      // language
       DOM.langEs.addEventListener("click", () => setLanguage("es"));
       DOM.langEn.addEventListener("click", () => setLanguage("en"));
 
-      // Calculations
+      // tiles
+      DOM.tiles.forEach((tile) => tile.addEventListener("click", () => setActiveTab(tile.dataset.go)));
+
+      // calc buttons
       DOM.btnCalcSolids.addEventListener("click", calculateSolids);
       DOM.btnCalcLiquids.addEventListener("click", calculateLiquids);
 
-      // Clear form
-      DOM.btnClear.addEventListener("click", resetApp);
+      // clear
+      DOM.btnClearAll.addEventListener("click", clearAll);
 
-      // Optional UX: Enter key triggers calculation based on card
-      DOM.cardSolids.addEventListener("keydown", (event) => {
-        if (event.key === "Enter") {
+      // info
+      DOM.btnInfo.addEventListener("click", openSheet);
+      DOM.btnCloseSheet.addEventListener("click", closeSheet);
+      DOM.sheetBackdrop.addEventListener("click", (e) => { if (e.target === DOM.sheetBackdrop) closeSheet(); });
+      document.addEventListener("keydown", (e) => { if (e.key === "Escape" && DOM.sheetBackdrop.classList.contains("open")) closeSheet(); });
+
+      // Enter triggers based on active panel
+      document.querySelectorAll("input, select").forEach((el) => {
+        el.addEventListener("keydown", (event) => {
+          if (event.key !== "Enter") return;
           event.preventDefault();
-          calculateSolids();
-        }
-      });
+          const panel = el.closest(".panel");
+          if (!panel) return;
+          if (panel.id === "panel-sol") calculateSolids();
+          else if (panel.id === "panel-liq") calculateLiquids();
+        });
 
-      DOM.cardLiquids.addEventListener("keydown", (event) => {
-        if (event.key === "Enter") {
-          event.preventDefault();
-          calculateLiquids();
-        }
-      });
-
-      // When user edits inputs after an error, clear card invalid state
-      document.querySelectorAll("input, select").forEach((field) => {
-        field.addEventListener("input", () => {
-          const solidsFields = [DOM.s_mw, DOM.s_m, DOM.s_m_u, DOM.s_v, DOM.s_v_u];
-          const liquidsFields = [DOM.l_rho, DOM.l_p, DOM.l_mw, DOM.l_m2, DOM.l_v2];
-
-          if (solidsFields.includes(field)) {
-            setCardValidity(DOM.cardSolids, true);
-            DOM.boxMass.classList.remove("is-error");
-          }
-
-          if (liquidsFields.includes(field)) {
-            setCardValidity(DOM.cardLiquids, true);
-            DOM.boxVol.classList.remove("is-error");
-          }
+        // soft reset invalid state while typing
+        el.addEventListener("input", () => {
+          const card = el.closest(".card");
+          if (card) setCardValidity(card, true);
         });
       });
+
+      // Optional: auto-refresh results if already visible (feels more "app-like")
+      const debounce = (fn, ms = 170) => {
+        let t;
+        return (...args) => {
+          clearTimeout(t);
+          t = setTimeout(() => fn(...args), ms);
+        };
+      };
+
+      const autoSol = debounce(() => { if (DOM.resSolids.classList.contains("visible")) calculateSolids(); }, 180);
+      const autoLiq = debounce(() => { if (DOM.resLiquids.classList.contains("visible")) calculateLiquids(); }, 180);
+
+      [DOM.s_mw, DOM.s_m, DOM.s_m_u, DOM.s_v, DOM.s_v_u].forEach((el)=> el.addEventListener("input", autoSol));
+      [DOM.l_rho, DOM.l_p, DOM.l_mw, DOM.l_m2, DOM.l_v2].forEach((el)=> el.addEventListener("input", autoLiq));
     }
 
-    /* =========================
-       App Init
-       ========================= */
-
-    function init() {
+    function init(){
       loadSavedLanguage();
-      applyTranslations(APP.currentLanguage);
-      clearAllResults();
+      loadSavedTab();
+      applyTranslations(APP.lang);
       bindEvents();
       setupInstallPrompt();
       registerServiceWorker();
+      clearAll();
+      setActiveTab(APP.activeTab);
     }
 
     init();
