@@ -121,7 +121,13 @@ MolarPrep/
 ├── icon-512.png
 ├── icon-maskable-192.png
 ├── icon-maskable-512.png
-└── og-image.png            ← Open Graph social preview
+├── og-image.png            ← Open Graph social preview
+└── src/
+    ├── css/
+    │   └── app.css         ← all styles
+    └── js/
+        ├── i18n.js         ← translation strings (ES / EN)
+        └── app.js          ← all application logic
 ```
 
 ---
