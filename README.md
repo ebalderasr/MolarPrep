@@ -1,143 +1,152 @@
-# 🧪 MolarPrep | Host Cell Lab Suite
-**Fast, reliable molarity and stock-solution calculations for laboratory workflows.**  
+<div align="center">
 
+# MolarPrep
 
-<p align="center">
-  <img src="icon-512.png" width="180" alt="MolarPrep Logo">
-</p>
+### Stock solution and molarity preparation for laboratory workflows
 
-<p align="center">
-  <a href="https://ebalderasr.github.io/MolarPrep/">
-    <img src="https://img.shields.io/badge/🚀_Launch_Live_App-MolarPrep-00e5ff?style=for-the-badge&labelColor=000000" alt="Launch MolarPrep App">
-  </a>
-</p>
+<a href="https://ebalderasr.github.io/MolarPrep/">
+  <img src="icon-512.png" alt="MolarPrep" width="120">
+</a>
 
-<p align="center">
-  <a href="https://github.com/ebalderasr/MolarPrep">Repo</a> •
-  <a href="https://ebalderasr.github.io/MolarPrep/">Live App</a>
-</p>
+<br>
+
+**[→ Open the live app](https://ebalderasr.github.io/MolarPrep/)**
+
+<br>
+
+[![Stack](https://img.shields.io/badge/Stack-HTML_·_CSS_·_JavaScript-4A90D9?style=for-the-badge)]()
+[![Focus](https://img.shields.io/badge/Focus-Solution_Prep_·_Lab_Workflows-34C759?style=for-the-badge)]()
+[![License](https://img.shields.io/badge/License-MIT-blue?style=for-the-badge)](./LICENSE)
+[![Part of](https://img.shields.io/badge/Part_of-Host_Cell_Lab_Suite-5856D6?style=for-the-badge)](https://github.com/ebalderasr)
+
+</div>
 
 ---
 
 ## What is MolarPrep?
 
-**MolarPrep** is a lightweight web app for preparing solutions with fewer calculation mistakes, especially in repetitive or high-pressure lab work.
+MolarPrep is a **browser-based solution preparation calculator** that covers the two most common reagent setup scenarios in a laboratory: weighing a dry solid to a target molarity, and pipetting the right volume from a liquid stock defined by density and purity.
 
-It helps you calculate:
+Both modules handle unit scaling automatically and validate inputs before computing, so the result is always expressed in a practical unit without manual prefix conversion.
 
-1. **How much solid reagent to weigh** to prepare a target molar solution
-2. **How much concentrated liquid stock to pipette** (using density and purity)
-
-The app is designed to reduce common errors such as:
-- decimal point shifts
-- unit conversion mistakes
-- confusion between **mM / µM / nM**
-- stock concentration estimation from reagent density + purity
+No installation. No server. Runs entirely in the browser.
 
 ---
+
+## Why it matters
+
+Preparing stock solutions involves multi-step unit conversions that are a frequent source of errors — especially under time pressure or when working across concentration scales (M, mM, µM, nM). Without a dedicated tool:
+
+- Mass calculations require manually converting target molarity and volume into consistent units before applying m = M × V × MW
+- Liquid reagent preparation involves a two-step calculation (density + purity → stock molarity, then C₁V₁ = C₂V₂) that is commonly collapsed or done incorrectly
+- The appropriate output unit (g, mg, µg / L, mL, µL) must be chosen by the user, introducing another judgment call
+
+MolarPrep handles all conversions internally and selects the output prefix automatically based on scale.
+
+---
+
 ## How it works
 
-MolarPrep currently includes **two calculation modules**.
+### Module 1 — Solid reagent (mass to weigh)
 
-### 1) Solid reagents (mass to weigh)
+Enter the target molarity, final volume, and molecular weight. MolarPrep returns the mass to weigh out.
 
-Use this when you have a dry reagent and want to prepare a solution with a target molarity.
+**Formula**
 
-**Formula used:**
+$$m \ (\text{g}) = M \left(\frac{\text{mol}}{\text{L}}\right) \times V \ (\text{L}) \times MW \left(\frac{\text{g}}{\text{mol}}\right)$$
 
-$$
-m(g) = M\left(\frac{mol}{L}\right) \times V(L) \times MW\left(\frac{g}{mol}\right)
-$$
+Supported molarity units: M, mM, µM, nM. Supported volume units: L, mL. Output is auto-scaled to g, mg, or µg depending on magnitude.
 
-Where:
-- **m** = required mass in grams
-- **M** = target molarity
-- **V** = final volume
-- **MW** = molecular weight
+### Module 2 — Liquid reagent (concentrated stock volume)
 
-✅ Supports target molarity units:
-- **M**
-- **mM**
-- **µM**
-- **nM**
+Use this when the reagent is a liquid sold by density and purity (e.g. acids, organic solvents). Enter density, purity, molecular weight, target molarity, and final volume.
 
-✅ Supports final volume units:
-- **L**
-- **mL**
+**Step A — Estimate stock molarity from density and purity**
 
----
+$$M_1 = \frac{P \times \rho \times 1000}{MW}$$
 
-### 2) Liquid reagents (concentrated stock volume)
+where P = purity fraction (e.g. 0.98), ρ = density in g/mL, MW = molecular weight in g/mol.
 
-Use this when your reagent is a liquid stock (for example acids/solvents/reagents sold by density and purity) and you need to prepare a target molar solution.
+**Step B — Apply dilution equation**
 
-#### Step A: Estimate stock molarity from density and purity
+$$V_1 = \frac{M_2 \times V_2}{M_1}$$
 
-$$
-M_1 = \frac{P \times \rho \times 1000}{MW}
-$$
+Output is auto-scaled to L, mL, or µL.
 
-Where:
-- **P** = purity fraction (e.g., 98% → 0.98)
-- **ρ** = density in g/mL
-- **MW** = molecular weight in g/mol
+### Output validation
 
-#### Step B: Use dilution equation
-
-$$
-V_1 = \frac{M_2 \times V_2}{M_1}
-$$
-
-Where:
-- **M₁** = stock molarity
-- **V₁** = volume of stock required
-- **M₂** = target molarity
-- **V₂** = target final volume
-
-✅ Output is automatically displayed in practical units (L / mL / µL depending on scale)
+Non-positive or missing values return `ERR`. All outputs are checked for physical consistency before display.
 
 ---
 
-## Smart output and error handling
+## Features
 
-MolarPrep includes a simple validation layer to reduce bad inputs:
-
-- **Non-positive values** return `ERR`
-- Invalid or missing inputs return `ERR`
-- Small outputs are automatically shown with a better metric prefix:
-  - g → mg → µg
-  - L → mL → µL
-
-This is intentionally simple and explicit so users can catch mistakes quickly.
-
-
----
-
-## Installation / PWA (optional)
-
-MolarPrep can be installed as a Progressive Web App (PWA) on supported browsers.
-
-### Desktop / Android
-- Open the live app
-- Click the **Install** button (if shown), or use browser install prompt
-
-### iPhone / iPad (Safari)
-- Open the live app
-- Tap **Share**
-- Select **Add to Home Screen**
-
-Once installed, it can work offline after the necessary files are cached.
-
+| | |
+|---|---|
+| **Solid reagent module** | Computes mass to weigh from molarity, volume, and MW |
+| **Liquid reagent module** | Estimates stock molarity from density and purity, then solves C₁V₁ = C₂V₂ |
+| **Auto unit scaling** | Output switches between g/mg/µg and L/mL/µL based on magnitude |
+| **Input validation** | Non-positive or missing values return ERR before computing |
+| **Offline-first PWA** | Service Worker caches all assets; works without internet after first load |
+| **Bilingual UI** | Full Spanish / English interface |
+| **No installation** | Opens instantly in any modern browser; installable on Android, iOS, and desktop |
 
 ---
 
-## 👨‍🔬 Author
-**Emiliano Balderas**
-Biotechnology Engineer | PhD Student in Biochemistry
-*Instituto de Biotecnología (IBt) - UNAM.*
+## Tech stack
+
+**Frontend**
+
+![HTML5](https://img.shields.io/badge/HTML5-E34F26?style=flat-square&logo=html5&logoColor=white)
+![CSS3](https://img.shields.io/badge/CSS3-1572B6?style=flat-square&logo=css3&logoColor=white)
+![JavaScript](https://img.shields.io/badge/JavaScript-F7DF1E?style=flat-square&logo=javascript&logoColor=black)
+
+**Deployment**
+
+![GitHub Pages](https://img.shields.io/badge/GitHub_Pages-222222?style=flat-square&logo=github&logoColor=white)
+![PWA](https://img.shields.io/badge/PWA-5A0FC8?style=flat-square&logo=pwa&logoColor=white)
+
+Fully static — no backend, no framework, no build step.
 
 ---
 
-## Part of the Host Cell Suite
+## Project structure
 
-**MolarPrep** is part of **Host Cell**, a suite of practical tools for bioprocessing and lab workflows.
+```
+MolarPrep/
+├── index.html              ← markup only
+├── manifest.json           ← PWA manifest
+├── sw.js                   ← Service Worker (cache-first, offline support)
+├── icon-192.png
+├── icon-512.png
+├── icon-maskable-192.png
+├── icon-maskable-512.png
+└── og-image.png            ← Open Graph social preview
+```
+
+---
+
+## Author
+
+**Emiliano Balderas Ramírez**
+Bioengineer · PhD Candidate in Biochemical Sciences
+Instituto de Biotecnología (IBt), UNAM
+
+[![LinkedIn](https://img.shields.io/badge/LinkedIn-emilianobalderas-0A66C2?style=flat-square&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/emilianobalderas/)
+[![Email](https://img.shields.io/badge/Email-ebalderas%40live.com.mx-D14836?style=flat-square&logo=gmail&logoColor=white)](mailto:ebalderas@live.com.mx)
+
+---
+
+## Related
+
+[**DiluteIt**](https://github.com/ebalderasr/DiluteIt) — universal dilution solver (C₁V₁ = C₂V₂) for any of the four variables.
+
+[**CellSplit**](https://github.com/ebalderasr/CellSplit) — Neubauer cell counting and passage planning for CHO cultures.
+
+[**PulseGrowth**](https://github.com/ebalderasr/PulseGrowth) — growth kinetics and metabolic rate estimation for mammalian cell culture.
+
+[**CellBlock**](https://github.com/ebalderasr/CellBlock) — shared biosafety cabinet scheduling for cell culture research groups.
+
+---
+
+<div align="center"><i>MolarPrep — enter your target, get your mass or volume.</i></div>
